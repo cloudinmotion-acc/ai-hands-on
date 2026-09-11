@@ -1,0 +1,46 @@
+[
+  {
+    "source_page": 4,
+    "invoice_no": "18479",
+    "vendor_name": "Raju Gari Biryani Adda",
+    "date": "2026-01-10",
+    "total": 740.00,
+    "subtotal": 740.00,
+    "tax": null,
+    "payment_method": null,
+    "gstin": null
+  },
+  {
+    "source_page": 1,
+    "invoice_no": "A53/0126-169318",
+    "vendor_name": "Maangalya Shopping Mall Pvt Ltd",
+    "date": "2026-01-18",
+    "total": 1875.00,
+    "subtotal": 1785.72,
+    "tax": 89.28,
+    "payment_method": "UPI",
+    "gstin": "36AASCM0878P1ZG"
+  },
+  {
+    "source_page": 2,
+    "invoice_no": "2228",
+    "vendor_name": "Sri Shyam Trading Co",
+    "date": "2026-01-21",
+    "total": 3012.00,
+    "subtotal": null,
+    "tax": null,
+    "payment_method": "Cash",
+    "gstin": null
+  },
+  {
+    "source_page": 3,
+    "invoice_no": "503B730040658",
+    "vendor_name": "Ratnadeep Retail Pvt Ltd",
+    "date": "2026-02-18",
+    "total": 147.00,
+    "subtotal": 140.02,
+    "tax": 6.98,
+    "payment_method": "PayTM",
+    "gstin": "36AABCR8039B1ZE"
+  }
+]

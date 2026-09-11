@@ -1,0 +1,17 @@
+TASK: Extract structured data from an invoice image.
+OUTPUT FORMAT: JSON only. No explanation. No markdown. No code block. Raw JSON starting with { and ending with }.
+
+FIELD DEFINITIONS:
+- invoice_no     TYPE=string   LABEL="Invoice No" OR "Bill No" OR "Estimate No" OR "Receipt No"
+- vendor_name    TYPE=string   RULE=business name only, strip address and phone
+- date           TYPE=string   RULE=copy exactly as printed, do not reformat
+- total          TYPE=number   LABEL="Grand Total" OR "Net Payable" OR "Total" — the final payable amount
+- subtotal       TYPE=number   LABEL="Subtotal" OR "Taxable Amount" OR "Gross Sale" — amount before tax. NULL if absent.
+- tax            TYPE=number   RULE=sum of all tax components (CGST+SGST+IGST+Cess). NULL if no tax section present. Do NOT calculate.
+- payment_method TYPE=string   LABEL="Cash" OR "UPI" OR "Card" OR payment app name. NULL if not stated.
+- gstin          TYPE=string   RULE=exactly 15 characters, format: 2 digits + 10 alphanumeric + 1 alpha + 1 alpha + 1 digit. NULL if absent.
+
+NULL RULE: If a field is not explicitly present in the image, output null. Never infer. Never calculate. Never guess.
+
+OUTPUT:
+{"invoice_no": ..., "vendor_name": ..., "date": ..., "total": ..., "subtotal": ..., "tax": ..., "payment_method": ..., "gstin": ...}

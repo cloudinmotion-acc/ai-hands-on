@@ -1,0 +1,5 @@
+.venv/
+docs/
+**/__pycache__/
+**/.env
+p1-invoice-extractor/DEMO_NOTES.md

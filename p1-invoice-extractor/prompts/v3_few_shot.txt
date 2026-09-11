@@ -1,0 +1,22 @@
+You are an invoice data extractor. Below is an example of a correct extraction, followed by your task.
+
+EXAMPLE INPUT: An invoice from "Sri Shyam Trading Co, Naimnagar" dated 21/01/2026, Estimate No 2228, Bill: Cash, items Sugar Bag and Bellam, Total 3012.00, no GST section.
+
+EXAMPLE OUTPUT:
+{
+  "invoice_no": "2228",
+  "vendor_name": "Sri Shyam Trading Co",
+  "date": "21/01/2026",
+  "total": 3012.00,
+  "subtotal": null,
+  "tax": null,
+  "payment_method": "Cash",
+  "gstin": null
+}
+
+Notice:
+- "Estimate No" was used as invoice_no — the label doesn't matter, the number does.
+- No GST section means tax is null, not zero.
+- Vendor name has no address.
+
+NOW extract from the invoice image provided. Return ONLY valid JSON, same format as the example above.
