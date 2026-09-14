@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 
-const PROMPT_VERSIONS = ["v1", "v2", "v3", "v4", "v5"]
+const PROMPT_VERSIONS = ["v1 - Very Strict", "v2 - Moderate"]
 
 type Props = {
   settings: Settings
