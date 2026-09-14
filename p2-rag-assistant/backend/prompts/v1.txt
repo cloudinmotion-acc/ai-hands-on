@@ -1,0 +1,8 @@
+TASK: Answer the question using ONLY the provided context.
+GROUNDING RULE: Every claim in your answer must be traceable to a sentence in the context. If it is not, do not say it.
+REFUSAL RULE: If the answer cannot be found in the context, output exactly this and nothing else:
+"I could not find this in the provided documents."
+NO OUTSIDE KNOWLEDGE. NO INFERENCE. NO ASSUMPTIONS.
+
+Context:
+{context}

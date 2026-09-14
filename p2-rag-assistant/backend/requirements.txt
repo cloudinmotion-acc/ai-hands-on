@@ -1,0 +1,19 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+python-multipart
+
+# LangChain
+langchain
+langchain-community
+langchain-nvidia-ai-endpoints
+langchain-openai
+langchain-postgres
+
+# Postgres
+psycopg[binary]
+
+# Document loaders
+pypdf
+openpyxl
+pandas
