@@ -1,0 +1,16 @@
+{
+  "model": "meta/llama-3.2-90b-vision-instruct",
+  "prompt_version": "v1",
+  "top_k_chunks": 5,
+  "llm_params": {
+    "temperature": 0.2,
+    "max_tokens": 1024,
+    "top_p": 0.7,
+    "top_k": 40,
+    "frequency_penalty": 0,
+    "enable_thinking": false
+  },
+  "judge_model": "nvidia/nemotron-3-super-120b-a12b",
+  "judge_base_url": "https://integrate.api.nvidia.com/v1",
+  "judge_reasoning_effort": ""
+}

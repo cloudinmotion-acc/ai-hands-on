@@ -1,0 +1,74 @@
+NovaSuite 3.0 - User Manual
+============================
+
+1. Getting Started
+------------------
+NovaSuite is a cloud-based project management platform. To get started, navigate to
+https://app.novasuite.io and click "Sign Up". Enter your work email address and choose
+a password of at least 12 characters. A verification link will be sent to your email.
+Click the link to activate your account.
+
+2. Logging In
+-------------
+Go to https://app.novasuite.io/login. Enter your registered email and password.
+If you have forgotten your password, click "Forgot Password" on the login page.
+You will receive a password reset email within 5 minutes. The reset link is valid
+for 24 hours. After resetting, you will be required to log in again with your new password.
+
+3. Resetting Your Password
+--------------------------
+To reset your password while logged in:
+  a. Click your profile icon in the top-right corner.
+  b. Select "Account Settings" from the dropdown.
+  c. Click "Change Password" under the Security section.
+  d. Enter your current password, then enter and confirm your new password.
+  e. Click "Save Changes". You will receive a confirmation email.
+
+If you are locked out after 5 failed login attempts, your account will be locked for
+15 minutes. After that, you may try again or use the "Forgot Password" option.
+
+4. Creating a Project
+---------------------
+From the dashboard, click the "+ New Project" button in the top-left panel.
+Enter the project name, description, and due date. Select the team members to invite.
+Choose a project template (Kanban, Scrum, or Blank) and click "Create".
+Projects can have a maximum of 50 members on the Standard plan and unlimited
+members on the Enterprise plan.
+
+5. Managing Tasks
+-----------------
+Inside a project, click "+ Add Task" to create a new task. Each task can have:
+  - A title and description
+  - An assignee (one team member)
+  - A due date
+  - A priority level: Low, Medium, High, or Critical
+  - Attachments up to 50 MB each
+
+Tasks can be moved between columns (To Do, In Progress, Done) by dragging and dropping.
+
+6. Notifications
+----------------
+By default, you will receive email notifications for:
+  - Tasks assigned to you
+  - Comments on tasks you are watching
+  - Project deadline reminders (3 days and 1 day before)
+
+To change notification preferences, go to Account Settings > Notifications.
+You can also enable push notifications by installing the NovaSuite mobile app
+(available on iOS and Android).
+
+7. Billing and Plans
+--------------------
+NovaSuite offers three plans:
+  - Free: Up to 3 projects, 5 members, 1 GB storage
+  - Standard ($12/user/month): Unlimited projects, 50 members per project, 100 GB storage
+  - Enterprise ($29/user/month): Unlimited everything, SSO, priority support, audit logs
+
+Billing is monthly or annual (annual gives a 20% discount). To upgrade, go to
+Settings > Billing > Upgrade Plan.
+
+8. Contacting Support
+---------------------
+For technical issues, email support@novasuite.io or use the in-app chat (bottom-right corner).
+Support hours are Monday to Friday, 9:00 AM to 6:00 PM UTC.
+Enterprise customers have access to 24/7 priority support.

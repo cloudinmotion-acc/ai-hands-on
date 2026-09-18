@@ -1,0 +1,10 @@
+ragas
+langchain-openai
+openai
+requests
+python-dotenv
+pandas
+tabulate
+httpx
+streamlit
+plotly

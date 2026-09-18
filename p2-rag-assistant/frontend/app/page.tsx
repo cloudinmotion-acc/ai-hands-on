@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { queryDocs, DEFAULT_SETTINGS, Message, Settings } from "@/lib/api";
 import { SettingsPanel } from "@/components/settings-panel";
 import { FileUpload } from "@/components/file-upload";
 import { ChatMessages } from "@/components/chat-messages";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Settings2, X } from "lucide-react";
+import { Settings2, X, GaugeCircle, Trash2 } from "lucide-react";
+import Link from "next/link";
 
 type UploadedFile = { name: string; chunks: number };
 
@@ -20,6 +21,44 @@ export default function Page() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [clearing, setClearing] = useState<"idle" | "confirm" | "working">("idle");
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  async function handleClear() {
+    if (clearing === "idle") {
+      // First click — arm the button. Auto-disarm after 3 s if not confirmed.
+      setClearing("confirm");
+      clearTimerRef.current = setTimeout(() => setClearing("idle"), 3000);
+      return;
+    }
+    if (clearing === "confirm") {
+      if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+      setClearing("working");
+      try {
+        await fetch("/api/sources", { method: "DELETE" });
+        // Wipe client state so chips vanish and "already indexed" skip resets.
+        setUploadedFiles([]);
+      } catch {}
+      setClearing("idle");
+    }
+  }
+
+  // Load whatever is already in pgvector so the header chips survive a refresh.
+  useEffect(() => {
+    fetch("/api/sources")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.sources?.length) {
+          setUploadedFiles(
+            data.sources.map((s: { name: string; chunks: number }) => ({
+              name: s.name,
+              chunks: s.chunks,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const hasMessages = messages.length > 0;
 
@@ -125,6 +164,38 @@ export default function Page() {
           ))}
         </div>
 
+        {/* Clear knowledge base — only shown when files are indexed */}
+        {uploadedFiles.length > 0 && (
+          <button
+            onClick={handleClear}
+            disabled={clearing === "working"}
+            title="Delete all embeddings from the vector database"
+            className={[
+              "shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-colors",
+              clearing === "confirm"
+                ? "bg-destructive/10 text-destructive hover:bg-destructive/20"
+                : "text-muted-foreground hover:text-destructive hover:bg-destructive/10",
+              clearing === "working" ? "opacity-50 cursor-not-allowed" : "",
+            ].join(" ")}
+          >
+            {clearing === "working" ? (
+              <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Trash2 className="w-3 h-3" />
+            )}
+            {clearing === "confirm" ? "Confirm clear?" : clearing === "working" ? "Clearing…" : "Clear KB"}
+          </button>
+        )}
+
+        {/* Quality gate */}
+        <Link
+          href="/eval"
+          className="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        >
+          <GaugeCircle className="w-3.5 h-3.5" />
+          Quality Gate
+        </Link>
+
         {/* Settings trigger */}
         <button
           onClick={() => setSettingsOpen(true)}
@@ -156,31 +227,37 @@ export default function Page() {
           </>
         ) : (
           /* ── Empty mode: upload + input grouped together in center ── */
-          <div className="flex-1 flex flex-col items-center justify-center px-5 py-8">
-            {/* Heading */}
-            <div className="flex flex-col items-center gap-3 text-center mb-7">
-              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" className="text-primary/40">
-                <rect x="8" y="4" width="24" height="36" rx="3" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M14 14h16M14 20h16M14 26h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M26 4v9h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              <h1 className="font-heading text-2xl font-semibold text-foreground tracking-tight">
-                Research Assistant
-              </h1>
-              <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
-                Upload a PDF or Excel file, then ask questions to get cited answers.
-              </p>
-            </div>
+          /* Scroll lives on the outer div; the inner min-h-full wrapper keeps the
+             group centered when it fits and lets it scroll from the top when the
+             upload results make it taller than the viewport. Putting justify-center
+             on the scroller itself would strand the top of the content above it. */
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <div className="min-h-full flex flex-col items-center justify-center px-5 py-8">
+              {/* Heading */}
+              <div className="flex flex-col items-center gap-3 text-center mb-7">
+                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" className="text-primary/40">
+                  <rect x="8" y="4" width="24" height="36" rx="3" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M14 14h16M14 20h16M14 26h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M26 4v9h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <h1 className="font-heading text-2xl font-semibold text-foreground tracking-tight">
+                  Chat With Your Document
+                </h1>
+                <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
+                  Upload one or more documents, then ask questions to get cited answers.
+                </p>
+              </div>
 
-            {/* Upload zone */}
-            <FileUpload
-              uploadedFiles={uploadedFiles}
-              onFilesChange={setUploadedFiles}
-            />
+              {/* Upload zone */}
+              <FileUpload
+                uploadedFiles={uploadedFiles}
+                onFilesChange={setUploadedFiles}
+              />
 
-            {/* Input bar — directly below upload zone */}
-            <div className="w-full max-w-sm mt-5">
-              {inputBar}
+              {/* Input bar — directly below upload zone */}
+              <div className="w-full max-w-sm mt-5">
+                {inputBar}
+              </div>
             </div>
           </div>
         )}

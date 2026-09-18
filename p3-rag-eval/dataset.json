@@ -1,0 +1,162 @@
+[
+  {
+    "id": 1,
+    "question": "What is the maximum attachment size for a task in NovaSuite?",
+    "ground_truth": "50 MB each",
+    "answerable": true,
+    "source_doc": "product_manual.txt",
+    "category": "product"
+  },
+  {
+    "id": 2,
+    "question": "How many members can a project have on the Standard plan?",
+    "ground_truth": "50 members per project",
+    "answerable": true,
+    "source_doc": "product_manual.txt",
+    "category": "product"
+  },
+  {
+    "id": 3,
+    "question": "How long is a password reset link valid in NovaSuite?",
+    "ground_truth": "24 hours",
+    "answerable": true,
+    "source_doc": "product_manual.txt",
+    "category": "product"
+  },
+  {
+    "id": 4,
+    "question": "What discount is given when switching to annual billing in NovaSuite?",
+    "ground_truth": "20% discount",
+    "answerable": true,
+    "source_doc": "product_manual.txt",
+    "category": "product"
+  },
+  {
+    "id": 5,
+    "question": "How many days of paid annual leave do full-time employees receive per year?",
+    "ground_truth": "20 days",
+    "answerable": true,
+    "source_doc": "company_policy.pdf",
+    "category": "hr"
+  },
+  {
+    "id": 6,
+    "question": "What is the notice period for senior managers and directors?",
+    "ground_truth": "8 weeks",
+    "answerable": true,
+    "source_doc": "company_policy.pdf",
+    "category": "hr"
+  },
+  {
+    "id": 7,
+    "question": "How many sick leave days are employees on probation entitled to?",
+    "ground_truth": "5 days during probation",
+    "answerable": true,
+    "source_doc": "company_policy.pdf",
+    "category": "hr"
+  },
+  {
+    "id": 8,
+    "question": "How many working days in advance must annual leave requests be approved?",
+    "ground_truth": "5 working days in advance",
+    "answerable": true,
+    "source_doc": "company_policy.pdf",
+    "category": "hr"
+  },
+  {
+    "id": 9,
+    "question": "Which department is at risk of overspending its budget?",
+    "ground_truth": "Sales",
+    "answerable": true,
+    "source_doc": "annual_report.pdf",
+    "category": "finance"
+  },
+  {
+    "id": 10,
+    "question": "What is the total approved budget across all departments?",
+    "ground_truth": "$580,000",
+    "answerable": true,
+    "source_doc": "annual_report.pdf",
+    "category": "finance"
+  },
+  {
+    "id": 11,
+    "question": "How much has the Engineering department spent in Q3?",
+    "ground_truth": "$112,000",
+    "answerable": true,
+    "source_doc": "annual_report.pdf",
+    "category": "finance"
+  },
+  {
+    "id": 12,
+    "question": "What percentage of the total budget does Engineering represent?",
+    "ground_truth": "31%",
+    "answerable": true,
+    "source_doc": "annual_report.pdf",
+    "category": "finance"
+  },
+  {
+    "id": 13,
+    "question": "Which product missed its Q3 sales target?",
+    "ground_truth": "ApiGateway Starter (achieved 93% of target)",
+    "answerable": true,
+    "source_doc": "quarterly_sales.xlsx",
+    "category": "sales"
+  },
+  {
+    "id": 14,
+    "question": "Who is the top sales performer by revenue?",
+    "ground_truth": "Emma Walsh with $210,000",
+    "answerable": true,
+    "source_doc": "quarterly_sales.xlsx",
+    "category": "sales"
+  },
+  {
+    "id": 15,
+    "question": "What was NovaSuite Standard's total revenue in Q3?",
+    "ground_truth": "$172,800",
+    "answerable": true,
+    "source_doc": "quarterly_sales.xlsx",
+    "category": "sales"
+  },
+  {
+    "id": 16,
+    "question": "How many salespeople exceeded their quota in Q3?",
+    "ground_truth": "4 out of 8",
+    "answerable": true,
+    "source_doc": "quarterly_sales.xlsx",
+    "category": "sales"
+  },
+  {
+    "id": 17,
+    "question": "When was Acme Corp founded?",
+    "ground_truth": "I could not find this in the provided documents.",
+    "answerable": false,
+    "source_doc": null,
+    "category": "unanswerable"
+  },
+  {
+    "id": 18,
+    "question": "What is the CEO's name?",
+    "ground_truth": "I could not find this in the provided documents.",
+    "answerable": false,
+    "source_doc": null,
+    "category": "unanswerable"
+  },
+  {
+    "id": 19,
+    "question": "What is NovaSuite's rating on the iOS App Store?",
+    "ground_truth": "I could not find this in the provided documents.",
+    "answerable": false,
+    "source_doc": null,
+    "category": "unanswerable"
+  },
+  {
+    "id": 20,
+    "question": "What was the company's total revenue in FY2025?",
+    "ground_truth": "I could not find this in the provided documents.",
+    "answerable": false,
+    "source_doc": null,
+    "category": "unanswerable"
+  }
+]

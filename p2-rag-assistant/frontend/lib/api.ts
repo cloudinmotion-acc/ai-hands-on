@@ -34,6 +34,49 @@ export type Message = {
   prompt_version?: string;
 };
 
+/**
+ * P3-only settings. The generator half is P2's `Settings` verbatim — the eval
+ * drives the real /query endpoint, so it must send exactly what the chat sends.
+ * The judge half is separate because it scores the answers rather than making
+ * them, and points at whichever OpenAI-compatible server hosts the judge model.
+ */
+export type EvalSettings = Settings & {
+  judge_model: string;
+  judge_base_url: string;
+  /**
+   * Sent as extra_body.reasoning_effort when non-empty. "none" suppresses
+   * chain-of-thought on Ollama — measured 40s per judge call versus 200-800s
+   * with it on. Leave blank for providers that reject the field.
+   */
+  judge_reasoning_effort: string;
+};
+
+export const NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1";
+export const OLLAMA_BASE_URL = "http://localhost:11434/v1";
+
+export const NVIDIA_MODELS = [
+  { value: "nvidia/nemotron-3-super-120b-a12b",    label: "nemotron-3-super-120b  (flagship)" },
+  { value: "meta/llama-3.2-90b-vision-instruct",   label: "llama-3.2-90b-vision  (large)" },
+  { value: "meta/llama-3.2-11b-vision-instruct",   label: "llama-3.2-11b-vision  (lightweight)" },
+];
+
+export const DEFAULT_EVAL_SETTINGS: EvalSettings = {
+  model: "nvidia/nemotron-3-super-120b-a12b",
+  prompt_version: "v1",
+  top_k_chunks: 4,
+  llm_params: {
+    temperature: 0.2,
+    max_tokens: 1024,
+    top_p: 0.7,
+    top_k: 40,
+    frequency_penalty: 0.0,
+    enable_thinking: false,
+  },
+  judge_model: "openai/gpt-oss-20b",
+  judge_base_url: NVIDIA_BASE_URL,
+  judge_reasoning_effort: "",
+};
+
 export const DEFAULT_SETTINGS: Settings = {
   model: "nvidia/nemotron-3-super-120b-a12b",
   prompt_version: "v1",

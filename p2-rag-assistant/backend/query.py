@@ -52,7 +52,7 @@ def _build_citations(docs_with_scores) -> list[Citation]:
             page=meta.get("page"),
             sheet=meta.get("sheet"),
             row_range=f"{meta['row_start']}-{meta['row_end']}" if "row_start" in meta else None,
-            snippet=doc.page_content[:300],
+            snippet=doc.page_content[:600],
             score=round(float(score), 4),
         ))
     return citations
