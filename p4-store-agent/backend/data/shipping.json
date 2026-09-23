@@ -1,0 +1,59 @@
+{
+  "zones": {
+    "metro": {
+      "label": "Metro",
+      "standard_days": 2,
+      "express_days": 1,
+      "standard_cost": 49,
+      "express_cost": 199,
+      "pincodes": [
+        "560001", "560002", "560003", "560034", "560068",
+        "400001", "400002", "400051", "400070",
+        "110001", "110002", "110019", "110020",
+        "600001", "600002", "600006",
+        "500001", "500002", "500032"
+      ]
+    },
+    "tier1": {
+      "label": "Tier-1 City",
+      "standard_days": 3,
+      "express_days": 2,
+      "standard_cost": 79,
+      "express_cost": 249,
+      "pincodes": [
+        "411001", "411002", "411028",
+        "380001", "380006", "380013",
+        "700001", "700002", "700019",
+        "226001", "226002", "226010",
+        "302001", "302002", "302019"
+      ]
+    },
+    "tier2": {
+      "label": "Tier-2 City",
+      "standard_days": 4,
+      "express_days": 3,
+      "standard_cost": 99,
+      "express_cost": 299,
+      "pincodes": [
+        "641001", "641002",
+        "452001", "452002",
+        "492001",
+        "248001",
+        "834001",
+        "360001",
+        "590001",
+        "781001"
+      ]
+    },
+    "remote": {
+      "label": "Remote / Rural",
+      "standard_days": 7,
+      "express_days": 5,
+      "standard_cost": 149,
+      "express_cost": 399,
+      "pincodes": []
+    }
+  },
+  "fallback_zone": "remote",
+  "note": "Pincodes not listed above fall into the remote zone."
+}

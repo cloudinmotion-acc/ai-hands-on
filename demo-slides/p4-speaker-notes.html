@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P4 Speaker Notes — Store Assistant Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Spectral:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+      --bg: #f8f3eb; --fg: #1c1510; --primary: #7c4a1a;
+      --muted: #8a7a6a; --border: #ddd0bc; --card: #fdf8f2;
+      --pass: #1e6b32; --fail: #b91c1c; --amber: #92400e;
+      --teal: #0f766e; --violet: #5b21b6;
+    }
+
+    body {
+      font-family: 'Manrope', system-ui, sans-serif;
+      background: var(--bg); color: var(--fg);
+      max-width: 860px; margin: 0 auto; padding: 3em 2em 5em;
+      font-size: 15px; line-height: 1.7;
+    }
+
+    /* ── Header ── */
+    .doc-title {
+      font-family: 'Spectral', Georgia, serif;
+      font-size: 2em; font-weight: 600; margin: 0 0 0.15em;
+    }
+    .doc-sub { font-size: 0.82em; color: var(--muted); margin: 0 0 0.5em; }
+    .doc-meta { font-size: 0.72em; color: var(--muted); margin: 0 0 2.5em; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+
+    /* ── Slide block ── */
+    .slide-block {
+      border: 1px solid var(--border); border-radius: 16px;
+      background: var(--card); margin-bottom: 2em; overflow: hidden;
+    }
+    .slide-header {
+      display: flex; align-items: center; gap: 1em;
+      padding: 0.9em 1.4em; border-bottom: 1px solid var(--border);
+      background: rgba(124,74,26,0.04);
+    }
+    .slide-num {
+      width: 2em; height: 2em; border-radius: 50%; border: 2px solid var(--primary);
+      color: var(--primary); font-size: 0.72em; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .slide-title { font-weight: 700; font-size: 0.92em; }
+    .slide-timing {
+      margin-left: auto; font-size: 0.68em; color: var(--muted);
+      background: var(--border); padding: 0.2em 0.6em; border-radius: 999px;
+      white-space: nowrap;
+    }
+    .slide-body { padding: 1.2em 1.5em; }
+
+    /* ── Action marker ── */
+    .action {
+      display: inline-flex; align-items: center; gap: 0.4em;
+      font-size: 0.7em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 0.2em 0.7em; border-radius: 999px; margin-bottom: 0.8em;
+    }
+    .act-say    { background: rgba(124,74,26,0.12); color: var(--primary); }
+    .act-do     { background: rgba(15,118,110,0.12); color: var(--teal); }
+    .act-point  { background: rgba(91,33,182,0.12); color: var(--violet); }
+    .act-demo   { background: rgba(124,74,26,1); color: #fff; }
+    .act-code   { background: #1c1510; color: #fbbf24; }
+    .act-warn   { background: rgba(185,28,28,0.1); color: var(--fail); }
+
+    /* ── Sections ── */
+    .section-label {
+      font-size: 0.68em; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--muted); margin: 1em 0 0.4em;
+    }
+    .speech {
+      font-size: 0.88em; line-height: 1.75; color: var(--fg);
+      padding: 0.8em 1em; background: rgba(124,74,26,0.04);
+      border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0;
+      margin-bottom: 0.8em;
+    }
+    .speech em { color: var(--muted); font-style: normal; font-size: 0.9em; }
+    .speech strong { color: var(--primary); font-weight: 700; }
+
+    .note {
+      font-size: 0.8em; color: var(--muted); line-height: 1.65;
+      padding: 0.6em 0.9em; border: 1px solid var(--border);
+      border-radius: 8px; margin-bottom: 0.6em;
+    }
+    .note strong { color: var(--fg); }
+
+    /* ── Demo step list ── */
+    .demo-steps { list-style: none; padding: 0; margin: 0; }
+    .demo-step {
+      display: flex; gap: 0.8em; padding: 0.7em 0.9em;
+      border-left: 3px solid var(--border); margin-bottom: 0.5em;
+      border-radius: 0 8px 8px 0; background: var(--card);
+    }
+    .ds-num {
+      width: 1.5em; height: 1.5em; border-radius: 50%;
+      background: var(--primary); color: #fff;
+      font-size: 0.7em; font-weight: 700; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ds-title { font-size: 0.8em; font-weight: 700; margin-bottom: 0.2em; }
+    .ds-say   { font-size: 0.75em; color: var(--muted); }
+
+    /* ── Code file ── */
+    .code-file {
+      border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden; margin-bottom: 0.6em;
+    }
+    .cf-head {
+      background: #1c1510; padding: 0.5em 0.9em;
+      font-family: monospace; font-size: 0.78em; color: #fbbf24; font-weight: 600;
+    }
+    .cf-body { padding: 0.7em 1em; font-size: 0.8em; color: var(--muted); line-height: 1.6; }
+    .cf-body strong { color: var(--fg); }
+
+    /* ── Special full-bleed slides ── */
+    .slide-block.slide-demo .slide-header { background: var(--primary); }
+    .slide-block.slide-demo .slide-num, .slide-block.slide-demo .slide-title { color: #fff; border-color: rgba(255,255,255,0.4); }
+    .slide-block.slide-demo .slide-timing { background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.8); }
+
+    .slide-block.slide-code .slide-header { background: #1c1510; }
+    .slide-block.slide-code .slide-num, .slide-block.slide-code .slide-title { color: #f8f3eb; border-color: rgba(248,243,235,0.3); }
+    .slide-block.slide-code .slide-timing { background: rgba(255,255,255,0.1); color: rgba(248,243,235,0.6); }
+
+    /* ── Print ── */
+    @media print {
+      body { max-width: 100%; padding: 1.5em; font-size: 13px; }
+      .slide-block { page-break-inside: avoid; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <p class="doc-sub">Speaker Notes</p>
+  <h1 class="doc-title">P4 — Store Assistant Agent</h1>
+  <p class="doc-meta">Bharath Aaleti &nbsp;·&nbsp; LangGraph ReAct · NVIDIA NIM &nbsp;·&nbsp; ~12 min total</p>
+
+  <div class="note">
+    <strong>Presentation flow:</strong>
+    Title (10 s) → Setup (25 s) →
+    <strong>[DEMO ~4 min]</strong> →
+    ReAct pattern (60 s) → Architecture (45 s) →
+    <strong>[CODE WALKTHROUGH ~3 min]</strong> →
+    Key decisions (75 s) → Connect dots (45 s) → Close (20 s)
+  </div>
+
+  <hr>
+
+  <!-- ──────────────────────────────────────────────
+       SLIDE 1 — TITLE
+       ────────────────────────────────────────────── -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <div class="slide-num">1</div>
+      <div class="slide-title">Title — Store Assistant Agent</div>
+      <div class="slide-timing">~10 seconds</div>
+    </div>
+    <div class="slide-body">
+      <span class="action act-say">Say</span>
+      <div class="speech">
+        "Good afternoon. I'm Bharath, and this is P4 of my AI Agentic Training Portfolio — the Store Assistant Agent.
+        Rather than opening with slides, let me just show you what it does."
+      </div>
+      <p class="section-label">Transition</p>
+      <div class="note">Move immediately to the demo slide. Don't linger here.</div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────
+       SLIDE 2 — THE PROBLEM
+       ────────────────────────────────────────────── -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <div class="slide-num">2</div>
+      <div class="slide-title">The Problem — One sentence, three backend lookups</div>
+      <div class="slide-timing">~25 seconds</div>
+    </div>
+    <div class="slide-body">
+      <span class="action act-say">Say</span>
+      <div class="speech">
+        "A customer says: <strong>'I want 6 navy slim-fit jeans, size M, express delivery to Delhi.'</strong>
+        Behind that one sentence, a store agent needs to do three things in the right order:
+        check whether 6 units are actually in stock, calculate the correct price including any bulk discount,
+        and look up the delivery timeline and cost for that pincode.
+        <br><br>
+        The agent handles all three. And if any step fails — item out of stock, pincode not serviceable —
+        it stops, tells the customer why, and doesn't waste time on the remaining steps."
+      </div>
+      <p class="section-label">Transition</p>
+      <div class="note">End on "let me show you" — move to demo slide.</div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────
+       SLIDE 3 — DEMO
+       ────────────────────────────────────────────── -->
+  <div class="slide-block slide-demo">
+    <div class="slide-header">
+      <div class="slide-num">3</div>
+      <div class="slide-title">DEMO — Live demonstration</div>
+      <div class="slide-timing">~4 minutes</div>
+    </div>
+    <div class="slide-body">
+      <span class="action act-do">Switch to browser — localhost:3000</span>
+      <p class="section-label" style="margin-top: 0.8em;">Run these 5 scenarios in order</p>
+
+      <ul class="demo-steps">
+        <li class="demo-step">
+          <div class="ds-num">1</div>
+          <div>
+            <div class="ds-title">Happy path — 2 Blue Shirts, size M → Bangalore</div>
+            <div class="ds-say">"Watch the trace panel on the right. The agent reasons first — picks check_stock. Then price_order. Then delivery_eta. Three tools, correct sequence, no instructions from us about order."</div>
+          </div>
+        </li>
+        <li class="demo-step">
+          <div class="ds-num">2</div>
+          <div>
+            <div class="ds-title">Bulk discount — 5 Black Hoodies, size L → Mumbai</div>
+            <div class="ds-say">"Five items triggers our BULK5 rule — 10% off. The agent figures this out automatically. We didn't tell the agent about the discount logic. We gave it a tool that applies discount rules, and the agent calls it with the right quantity."</div>
+          </div>
+        </li>
+        <li class="demo-step">
+          <div class="ds-num">3</div>
+          <div>
+            <div class="ds-title">Out of stock — 3 Olive Hoodies, size M → Bangalore</div>
+            <div class="ds-say">"Only 2 in stock. check_stock returns in_stock: false. The agent reads that and stops immediately — doesn't call price_order or delivery_eta. Clean early exit. No hard-coded if-else in the graph."</div>
+          </div>
+        </li>
+        <li class="demo-step">
+          <div class="ds-num">4</div>
+          <div>
+            <div class="ds-title">Bad pincode — 1 White Polo, size S → 999999</div>
+            <div class="ds-say">"999999 isn't in our delivery network. delivery_eta returns an error dict. The agent reads it and surfaces it as a clear message to the customer."</div>
+          </div>
+        </li>
+        <li class="demo-step">
+          <div class="ds-num">5</div>
+          <div>
+            <div class="ds-title">Express + bulk — 6 Navy Jeans, size M → Delhi (express)</div>
+            <div class="ds-say">"Both a bulk discount AND express shipping in one run. Notice the elapsed timer — about 30 seconds for 7 agent steps. Now let me show you what's happening under the hood."</div>
+          </div>
+        </li>
+      </ul>
+
+      <span class="action act-do" style="margin-top: 0.5em;">Switch back to slides</span>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────
+       SLIDE 4 — REACT PATTERN
+       ────────────────────────────────────────────── -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <div class="slide-num">4</div>
+      <div class="slide-title">The ReAct Pattern — Reason, Act, Observe</div>
+      <div class="slide-timing">~60 seconds</div>
+    </div>
+    <div class="slide-body">
+      <span class="action act-say">Say</span>
+      <div class="speech">
+        "What you just watched is called the <strong>ReAct pattern</strong> — Reason, Act, Observe.
+        <br><br>
+        The LLM first reasons: <em>'I need to check stock.'</em> It emits a tool_call.
+        LangGraph intercepts that, runs the check_stock function, appends the result to the message history,
+        and sends everything back to the LLM.
+        <br><br>
+        The LLM reads the result — it observes. It reasons again about what to do next.
+        This loop continues until the LLM produces a message with <strong>no tool calls</strong>.
+        That's the exit. That's the final answer.
+        <br><br>
+        The key insight: we didn't program the sequence check → price → delivery into the graph.
+        We wrote tool descriptions and a system prompt. The LLM infers the sequence itself.
+        And when stock is out? The LLM sees <code>in_stock: false</code> and decides on its own to stop."
+      </div>
+      <span class="action act-point">Point at diagram</span>
+      <div class="note">Point at each node as you name it. The loop arrow going back is the key visual — it shows this isn't a linear pipeline.</div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────
+       SLIDE 5 — ARCHITECTURE
+       ────────────────────────────────────────────── -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <div class="slide-num">5</div>
+      <div class="slide-title">Architecture — LangGraph State Machine</div>
+      <div class="slide-timing">~45 seconds</div>
+    </div>
+    <div class="slide-body">
+      <span class="action act-say">Say</span>
+      <div class="speech">
+        "The implementation is a <strong>LangGraph state machine</strong> — two nodes connected in a loop.
+        <br><br>
+        The <strong>agent node</strong> is the LLM. It receives the full message history and responds:
+        either with tool_calls, or with plain text if it's done.
+        <br><br>
+        The <strong>tools node</strong> is a ToolNode — it receives the tool_calls, runs each function,
+        and appends the results as ToolMessages.
+        <br><br>
+        After every tool execution, we route back to the agent node.
+        After every agent response, a conditional edge checks: any tool_calls? Yes → tools. No → END.
+        <br><br>
+        The state is just the conversation history. LangGraph's <code>add_messages</code> reducer handles merging — we never manually manage the list."
+      </div>
+      <p class="section-label">Transition</p>
+      <div class="note">"Now let me quickly open the code." — move to code walkthrough slide.</div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────
+       SLIDE 6 — CODE TRANSITION
+       ────────────────────────────────────────────── -->
+  <div class="slide-block slide-code">
+    <div class="slide-header">
+      <div class="slide-num">6</div>
+      <div class="slide-title">CODE WALKTHROUGH — Four files</div>
+      <div class="slide-timing">~3 minutes</div>
+    </div>
+    <div class="slide-body">
+      <span class="action act-code">Open VS Code — p4-store-agent/backend/</span>
+
+      <div class="code-file">
+        <div class="cf-head">agent.py</div>
+        <div class="cf-body">
+          <strong>Open this file first.</strong>
+          Show the <code>build_graph()</code> function — two nodes, one conditional edge, one back-edge.
+          Then show <code>agent_node</code>: it's async. Point out the for loop — that's the retry logic.
+          <br><br>
+          Say: <em>"This is the brain. The graph is defined here — two nodes. The agent_node is async
+          because it sleeps between retries when NVIDIA's API returns an overload error.
+          Four attempts, 5 seconds, 10 seconds, 20 seconds. The user never sees a transient failure.
+          It also reads a model override from the config — that's how the dropdown in the UI actually
+          changes which LLM runs."</em>
+        </div>
+      </div>
+
+      <div class="code-file">
+        <div class="cf-head">tools.py</div>
+        <div class="cf-body">
+          Show one complete tool function, e.g. <code>check_stock</code>.
+          Point at the <code>@tool</code> decorator and the docstring.
+          <br><br>
+          Say: <em>"Three @tool-decorated functions. The decorator does two things: it wraps the function
+          as a LangChain tool, and it feeds the docstring to the LLM so it knows what each tool does
+          and what parameters it takes. check_stock reads inventory.json,
+          price_order reads discounts.json, delivery_eta reads shipping.json.
+          Static JSON for now — in prod these would be database calls.
+          Each tool returns a typed dict, or an <code>{'error': ...}</code> key on failure —
+          the agent reads that error and decides what to say to the customer."</em>
+        </div>
+      </div>
+
+      <div class="code-file">
+        <div class="cf-head">main.py</div>
+        <div class="cf-body">
+          Show the <code>_stream_agent</code> function. Point at the <code>astream_events</code> call
+          and the <code>_sse()</code> helper.
+          <br><br>
+          Say: <em>"FastAPI backend. The key function is <code>_stream_agent</code>. It runs the graph
+          and translates each LangGraph event into a Server-Sent Event: thought tokens, tool calls,
+          tool results, and a final 'answer' event. The frontend subscribes to this stream
+          and renders each event in real-time as it arrives."</em>
+        </div>
+      </div>
+
+      <div class="code-file">
+        <div class="cf-head">app/page.tsx</div>
+        <div class="cf-body">
+          Scroll to the trace rendering section, then the answer card at the bottom.
+          <br><br>
+          Say: <em>"Next.js frontend. The right panel renders every SSE event as it arrives —
+          thoughts, tool calls with collapsible JSON, and tool results with typed cards
+          for each tool. The bottom strip is the structured summary: stock count, price, delivery.
+          The final text response goes through react-markdown — so bold and bullet-point formatting
+          from the LLM renders correctly instead of showing raw asterisks."</em>
+        </div>
+      </div>
+
+      <span class="action act-do" style="margin-top: 0.5em;">Switch back to slides</span>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────
+       SLIDE 7 — FILE MAP (visible during walkthrough)
+       ────────────────────────────────────────────── -->
+  <div class="slide-block slide-code">
+    <div class="slide-header">
+      <div class="slide-num">7</div>
+      <div class="slide-title">Codebase Map (reference slide)</div>
+      <div class="slide-timing">stays up during code walkthrough</div>
+    </div>
+    <div class="slide-body">
+      <div class="note">This slide is a visual reference. Leave it visible while you talk through the code in VS Code. No separate speech needed — the slide speaks for itself.</div>
+      <div class="note">Mention: <strong>backend/data/</strong> has three JSON files — inventory.json (12 SKUs), discounts.json (bulk, SKU, first-order rules), shipping.json (metro/tier-2/remote zones + pincodes). In production these would be DB calls — the tool interface stays the same.</div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────
+       SLIDE 8 — KEY DECISIONS
+       ────────────────────────────────────────────── -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <div class="slide-num">8</div>
+      <div class="slide-title">Three Engineering Decisions That Matter</div>
+      <div class="slide-timing">~75 seconds</div>
+    </div>
+    <div class="slide-body">
+      <span class="action act-say">Say — one paragraph per decision</span>
+
+      <p class="section-label">1 — LangGraph over plain chains</p>
+      <div class="speech">
+        "A plain LangChain chain is a pipeline — input in, output out, step A feeds step B.
+        Pipelines can't loop. An agent needs to call tools an <strong>unknown number of times</strong>
+        in an unknown order before it's done. LangGraph gives you a proper state machine with
+        conditional edges. That's what makes autonomous multi-step behaviour possible."
+      </div>
+
+      <p class="section-label">2 — SSE streaming over a JSON endpoint</p>
+      <div class="speech">
+        "I could have made <code>/chat</code> return a plain JSON blob when the agent finishes.
+        But the agent takes up to 90 seconds on NVIDIA's free tier. Without streaming,
+        the UI is frozen for 90 seconds. With streaming, every thought token, every tool call,
+        every result arrives the moment it happens. The user watches the agent reason —
+        that's the difference between <em>'what is it doing?'</em> and <em>'I can see exactly what it's doing.'</em>"
+      </div>
+
+      <p class="section-label">3 — Exponential backoff for the NVIDIA API</p>
+      <div class="speech">
+        "NVIDIA's free-tier endpoint is a shared resource. Under concurrent load it returns
+        HTTP 529 — service temporarily overloaded. Without retry logic, that's a raw error
+        message to the user for a condition that usually clears in 10 seconds.
+        The backend now catches that exception, sleeps 5 seconds, tries again.
+        If it fails — 10 seconds. Then 20. Up to 4 attempts.
+        Most overload errors resolve within one or two retries. The user never sees it."
+      </div>
+
+      <div class="note">
+        <strong>If asked about the async_http_client error you fixed:</strong>
+        "When making the agent_node async for the retry sleep, the LLM calls switched to ainvoke().
+        That needs an async HTTP client for the SSL bypass we need on the corporate proxy.
+        I used the wrong parameter name — the installed version of langchain_openai uses
+        <code>http_async_client</code>, not <code>async_http_client</code>.
+        Wrong name got silently forwarded to the OpenAI API which rejected it.
+        One-line fix once identified."
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────
+       SLIDE 9 — CONNECTING THE DOTS
+       ────────────────────────────────────────────── -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <div class="slide-num">9</div>
+      <div class="slide-title">Connecting the Dots — P1 → P4</div>
+      <div class="slide-timing">~45 seconds</div>
+    </div>
+    <div class="slide-body">
+      <span class="action act-say">Say</span>
+      <div class="speech">
+        "Looking at the full arc of the portfolio — each phase introduces one new capability
+        and builds on everything before it.
+        <br><br>
+        <strong>P1 was discipline</strong> — getting the LLM to produce reliable, structured outputs.
+        That discipline is still here in how our tools return typed dicts with predictable keys.
+        <br><br>
+        <strong>P2 added context</strong> — instead of relying on training data, the LLM reasons
+        over documents you control.
+        <br><br>
+        <strong>P3 added rigour</strong> — we don't just trust the output looks good.
+        We measure it against ground truth using RAGAS metrics.
+        <br><br>
+        <strong>P4 adds hands</strong> — the LLM moves from answering questions to taking actions.
+        It calls tools, reads results, decides what to do next.
+        <br><br>
+        Each phase is a standalone demo. But it's also a building block for the next one."
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────────────
+       SLIDE 10 — CLOSE
+       ────────────────────────────────────────────── -->
+  <div class="slide-block">
+    <div class="slide-header">
+      <div class="slide-num">10</div>
+      <div class="slide-title">Close — What's next</div>
+      <div class="slide-timing">~20 seconds</div>
+    </div>
+    <div class="slide-body">
+      <span class="action act-say">Say</span>
+      <div class="speech">
+        "P5 brief is coming soon.
+        <br><br>
+        The goal of this portfolio isn't just working demos for each phase.
+        It's internalising the patterns that come up in real AI engineering work —
+        tool orchestration, quality evaluation, streaming UX, API reliability.
+        So when these topics surface in an interview or a design review, I can speak to them
+        from actual implementation experience. Not just theory.
+        <br><br>
+        That's P4. Any questions?"
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ──────────────────────────────────────────────
+       QUICK REFERENCE
+       ────────────────────────────────────────────── -->
+  <h2 style="font-family: 'Spectral', serif; font-size: 1.3em; margin: 0 0 0.8em;">Quick Reference — If you get questions</h2>
+
+  <div class="slide-block">
+    <div class="slide-header">
+      <div class="slide-num" style="font-size: 0.65em;">Q</div>
+      <div class="slide-title">Why not just use a plain LLM API call with a loop?</div>
+    </div>
+    <div class="slide-body">
+      <div class="speech">
+        "You can build this with a raw while loop — call the LLM, check if it returned tool_calls,
+        execute them, repeat. LangGraph does exactly that, plus: thread-safe state management,
+        streaming event hooks, checkpointing, observability. You get all of that for free.
+        For a personal project, either works. At production scale, the infrastructure matters."
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-block">
+    <div class="slide-header">
+      <div class="slide-num" style="font-size: 0.65em;">Q</div>
+      <div class="slide-title">What if the LLM calls tools in the wrong order?</div>
+    </div>
+    <div class="slide-body">
+      <div class="speech">
+        "The system prompt instructs it to call check_stock first, then price_order, then delivery_eta.
+        The tool descriptions reinforce this — price_order says 'use the SKU returned by check_stock'.
+        In practice, the LLM follows the sequence reliably. If it doesn't, you can add an output parser
+        or a validation step — LangGraph supports adding more nodes. But we haven't needed it."
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-block">
+    <div class="slide-header">
+      <div class="slide-num" style="font-size: 0.65em;">Q</div>
+      <div class="slide-title">What does 'state' mean in LangGraph?</div>
+    </div>
+    <div class="slide-body">
+      <div class="speech">
+        "State is just a TypedDict — in our case, a list of messages.
+        Every node reads the full state and returns a partial update.
+        LangGraph merges updates using reducers — the <code>add_messages</code> reducer
+        appends new messages rather than replacing the list.
+        Think of it like Redux for AI agents."
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-block">
+    <div class="slide-header">
+      <div class="slide-num" style="font-size: 0.65em;">Q</div>
+      <div class="slide-title">Why NVIDIA NIM instead of OpenAI directly?</div>
+    </div>
+    <div class="slide-body">
+      <div class="speech">
+        "NVIDIA's NIM API is free-tier accessible with my existing API key, and the models —
+        nemotron-3-super-120b — are strong enough for tool-calling tasks.
+        The interface is OpenAI-compatible, so switching to OpenAI or Azure OpenAI is a one-line
+        change to the base_url and model name. The abstraction holds."
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "rules": [
+    {
+      "id": "BULK3",
+      "description": "5% off when ordering 3 or more items",
+      "type": "bulk",
+      "min_quantity": 3,
+      "max_quantity": 4,
+      "discount_percent": 5
+    },
+    {
+      "id": "BULK5",
+      "description": "10% off when ordering 5 or more items",
+      "type": "bulk",
+      "min_quantity": 5,
+      "max_quantity": null,
+      "discount_percent": 10
+    },
+    {
+      "id": "CLEARANCE",
+      "description": "20% off on clearance items",
+      "type": "sku",
+      "skus": [
+        "JACKET-OLIVE-S", "JACKET-OLIVE-M",
+        "HOODIE-OLIVE-S", "HOODIE-OLIVE-M", "HOODIE-OLIVE-L", "HOODIE-OLIVE-XL",
+        "POLO-WHITE-XL", "SHIRT-BLUE-XL"
+      ],
+      "discount_percent": 20
+    },
+    {
+      "id": "FIRST_ORDER",
+      "description": "15% off for first-time customers",
+      "type": "customer",
+      "customer_tag": "first_order",
+      "discount_percent": 15
+    }
+  ],
+  "stacking": "best_single",
+  "note": "Only the best applicable discount is applied — rules do not stack."
+}

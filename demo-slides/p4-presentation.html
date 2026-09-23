@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P4 — Store Assistant Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <style>
+    :root {
+      --bg:      #f8f3eb;
+      --fg:      #1c1510;
+      --primary: #7c4a1a;
+      --muted:   #8a7a6a;
+      --border:  #ddd0bc;
+      --card:    #fdf8f2;
+      --amber:   #92400e;
+      --teal:    #0f766e;
+      --violet:  #5b21b6;
+      --pass:    #1e6b32;
+    }
+
+    /* ── Reveal overrides ── */
+    .reveal {
+      font-family: 'Manrope', system-ui, sans-serif;
+      font-size: 40px;          /* Reveal themes default to ~40px; without a theme it falls back to 16px */
+      background: var(--bg);
+      color: var(--fg);
+    }
+    .reveal .slides section {
+      text-align: left;
+      height: 100%;
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .reveal .progress       { background: var(--border); height: 3px; }
+    .reveal .progress span  { background: var(--primary); }
+    .reveal .slide-number   { background: transparent; color: var(--muted); font-size: 0.5em; }
+
+    /* ── Typography ── */
+    .reveal h1 {
+      font-family: 'Spectral', Georgia, serif;
+      font-size: 2.4em; font-weight: 600;
+      color: var(--fg); line-height: 1.1;
+      margin: 0; letter-spacing: -0.01em;
+    }
+    .reveal h2 {
+      font-family: 'Spectral', Georgia, serif;
+      font-size: 1.6em; font-weight: 600;
+      color: var(--fg); line-height: 1.2;
+      margin: 0 0 0.5em; letter-spacing: -0.01em;
+    }
+    .reveal h3 {
+      font-family: 'Manrope', sans-serif;
+      font-size: 0.55em; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.14em;
+      color: var(--muted); margin: 0 0 0.7em;
+    }
+    .reveal p    { margin: 0; line-height: 1.65; }
+    .reveal ul   { list-style: none; padding: 0; margin: 0; }
+    .reveal code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8em; background: rgba(0,0,0,0.07);
+      padding: 0.05em 0.35em; border-radius: 4px;
+    }
+    .reveal strong { font-weight: 700; }
+
+    /* ── Slide wrapper used in every slide ── */
+    .slide-inner {
+      width: 100%;
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 0 2em;
+    }
+
+    /* ── Divider ── */
+    .div-line {
+      height: 1px; background: var(--border);
+      margin: 0.6em 0;
+    }
+
+    /* ── Tags / pills ── */
+    .tag {
+      display: inline-block;
+      padding: 0.15em 0.7em; border-radius: 999px;
+      font-size: 0.5em; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .tg-primary { background: rgba(124,74,26,0.14); color: var(--primary); }
+    .tg-amber   { background: rgba(146,64,14,0.13);  color: var(--amber); }
+    .tg-teal    { background: rgba(15,118,110,0.13);  color: var(--teal); }
+    .tg-violet  { background: rgba(91,33,182,0.13);   color: var(--violet); }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 0.9em 1.1em;
+    }
+    .card-title {
+      font-size: 0.6em; font-weight: 700;
+      color: var(--fg); margin: 0.4em 0 0.2em;
+    }
+    .card-body {
+      font-size: 0.52em; color: var(--muted); line-height: 1.6;
+    }
+
+    /* ── Step cards (problem slide) ── */
+    .step-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.7em; margin-top: 0.9em;
+    }
+    .step-card {
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 1em 1.1em;
+      background: var(--card);
+    }
+    .step-num {
+      font-size: 0.48em; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; margin-bottom: 0.5em;
+    }
+    .step-title { font-size: 0.62em; font-weight: 700; color: var(--fg); margin: 0 0 0.25em; }
+    .step-desc  { font-size: 0.52em; color: var(--muted); line-height: 1.55; margin: 0; }
+
+    /* ── ReAct diagram ── */
+    .react-diagram {
+      display: flex; align-items: center;
+      justify-content: center; gap: 0.5em;
+      margin: 1em 0;
+    }
+    .rn {
+      flex: 1; max-width: 180px;
+      border: 2px solid; border-radius: 14px;
+      padding: 0.8em 0.6em; text-align: center;
+    }
+    .rn-icon  { font-size: 1.1em; display: block; margin-bottom: 0.2em; }
+    .rn-label { font-size: 0.58em; font-weight: 700; display: block; margin-bottom: 0.15em; }
+    .rn-sub   { font-size: 0.46em; font-weight: 400; display: block; }
+    .rn-r { border-color: var(--primary); background: rgba(124,74,26,0.07); color: var(--primary); }
+    .rn-a { border-color: var(--amber);   background: rgba(146,64,14,0.07); color: var(--amber); }
+    .rn-o { border-color: var(--teal);    background: rgba(15,118,110,0.07); color: var(--teal); }
+    .react-arrow { font-size: 1em; color: var(--muted); flex-shrink: 0; }
+
+    .react-caption {
+      text-align: center; font-size: 0.5em; color: var(--muted);
+      margin-top: 0.3em;
+    }
+
+    .react-facts {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0.7em; margin-top: 0.8em;
+    }
+    .rf { border-left: 3px solid var(--border); padding-left: 0.8em; }
+    .rf-title { font-size: 0.56em; font-weight: 700; color: var(--fg); margin: 0 0 0.2em; }
+    .rf-body  { font-size: 0.49em; color: var(--muted); line-height: 1.55; margin: 0; }
+
+    /* ── Architecture diagram ── */
+    .arch-wrap {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0; margin: 0.8em 0;
+    }
+    .arch-box {
+      border: 2px solid var(--border); border-radius: 10px;
+      padding: 0.45em 1.5em; text-align: center; font-size: 0.58em;
+    }
+    .ab-agent { border-color: var(--primary); background: rgba(124,74,26,0.07); color: var(--primary); font-weight: 700; width: 280px; }
+    .ab-tools { border-color: var(--amber); background: rgba(146,64,14,0.07); color: var(--amber); font-weight: 700; width: 360px; }
+    .ab-start { width: 80px; font-weight: 600; }
+    .ab-end   { width: 200px; font-weight: 600; }
+    .ab-sub   { font-weight: 400; font-size: 0.85em; opacity: 0.75; }
+    .arch-arr { font-size: 0.7em; color: var(--muted); line-height: 1.4; text-align: center; }
+    .arch-branch {
+      display: flex; align-items: flex-start;
+      gap: 2.5em; margin: 0;
+    }
+    .arch-col { display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .arch-meta { font-size: 0.43em; color: var(--muted); text-align: center; margin-top: 0.3em; max-width: 100px; }
+
+    .arch-legend {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.6em; margin-top: 0.7em;
+    }
+    .al { font-size: 0.48em; color: var(--muted); line-height: 1.55; }
+    .al strong { color: var(--fg); }
+
+    /* ── File map (dark slide) ── */
+    .file-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0.7em; margin-top: 0.5em;
+    }
+    .fc {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px; padding: 0.8em 1em;
+    }
+    .fc-name { font-family: 'Fira Code', monospace; font-size: 0.58em; font-weight: 600; color: #fbbf24; margin-bottom: 0.35em; }
+    .fc-body { font-size: 0.5em; color: rgba(248,243,235,0.55); line-height: 1.6; }
+
+    /* ── Decisions ── */
+    .decision {
+      display: flex; align-items: flex-start;
+      gap: 0.9em; margin-bottom: 0.85em;
+      padding-left: 0.6em; border-left: 3px solid var(--border);
+    }
+    .d-icon { font-size: 1em; flex-shrink: 0; margin-top: 0.05em; }
+    .d-title { font-size: 0.62em; font-weight: 700; color: var(--fg); margin: 0 0 0.2em; }
+    .d-body  { font-size: 0.52em; color: var(--muted); line-height: 1.6; margin: 0; }
+
+    /* ── Timeline ── */
+    .tl-row {
+      display: flex; align-items: flex-start;
+      margin: 1em 0 0.6em; position: relative;
+    }
+    .tl-row::before {
+      content: '';
+      position: absolute; top: 1em; left: 1.8em; right: 1.8em;
+      height: 2px; background: var(--border);
+    }
+    .tl-phase {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; position: relative; z-index: 1;
+    }
+    .tl-dot {
+      width: 2em; height: 2em; border-radius: 50%;
+      border: 2.5px solid; background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.52em; font-weight: 700;
+    }
+    .td-1 { border-color: var(--primary); color: var(--primary); }
+    .td-2 { border-color: var(--amber);   color: var(--amber); }
+    .td-3 { border-color: var(--teal);    color: var(--teal); }
+    .td-4 { border-color: var(--violet);  color: var(--violet); background: rgba(91,33,182,0.07); }
+
+    .tl-label { font-size: 0.54em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.5em; text-align: center; }
+    .tl-cap   { font-size: 0.46em; color: var(--muted); text-align: center; margin-top: 0.15em; max-width: 110px; line-height: 1.45; }
+
+    .tl-summary {
+      font-size: 0.54em; color: var(--muted); line-height: 1.7;
+      padding: 0.7em 1em; background: rgba(124,74,26,0.04);
+      border-radius: 10px; border: 1px solid var(--border);
+      margin-top: 0.5em;
+    }
+    .tl-summary strong { color: var(--fg); font-weight: 700; }
+
+    /* ── Close quote ── */
+    .blockquote {
+      margin-top: 1.5em;
+      padding: 1em 1.3em;
+      border-left: 3px solid var(--primary);
+      background: rgba(124,74,26,0.04);
+      border-radius: 0 10px 10px 0;
+    }
+    .bq-text { font-size: 0.62em; font-style: italic; color: var(--fg); line-height: 1.65; margin: 0; }
+
+    /* ── Text helpers ── */
+    .eyebrow {
+      font-size: 0.5em; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--muted); margin: 0 0 0.5em;
+    }
+    .body-lg  { font-size: 0.62em; line-height: 1.7; color: var(--muted); margin: 0; }
+    .body-sm  { font-size: 0.54em; line-height: 1.65; color: var(--muted); margin: 0; }
+
+    /* ── Dark-slide text overrides (targeted by data attribute) ── */
+    .reveal section[data-background-color="#1c1510"] h2,
+    .reveal section[data-background-color="#1c1510"] h3 { color: #f8f3eb; }
+    .reveal section[data-background-color="#1c1510"] .eyebrow { color: rgba(248,243,235,0.38); }
+    .reveal section[data-background-color="#1c1510"] .body-lg { color: rgba(248,243,235,0.65); }
+
+    /* ── Demo-slide text overrides ── */
+    .reveal section[data-background-color="#7c4a1a"] h2 { color: #fff; font-family: 'Spectral', Georgia, serif; }
+    .reveal section[data-background-color="#7c4a1a"] p  { color: rgba(255,255,255,0.7); }
+    .reveal section[data-background-color="#7c4a1a"] .eyebrow { color: rgba(255,255,255,0.45); }
+  </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════════════════════════
+     1 · TITLE
+═══════════════════════════════════════════ -->
+<section>
+  <div class="slide-inner">
+
+    <span class="tag tg-violet" style="margin-bottom: 1.1em; display: inline-block;">Portfolio · Phase 4 of 8</span>
+
+    <h1>Store Assistant<br>Agent</h1>
+
+    <p class="body-lg" style="margin-top: 0.5em;">
+      LangGraph ReAct &nbsp;·&nbsp; NVIDIA NIM &nbsp;·&nbsp; FastAPI &nbsp;·&nbsp; Next.js
+    </p>
+
+    <div class="div-line" style="margin-top: 1.4em;"></div>
+
+    <p class="body-sm" style="margin-top: 0.6em; color: var(--muted);">
+      Bharath Aaleti &nbsp;·&nbsp; FDE / AI Engineer &nbsp;·&nbsp; Accenture
+    </p>
+
+  </div>
+  <aside class="notes">
+    10 seconds. "I'm Bharath — this is P4, the Store Assistant Agent. Let me just show you what it does before I explain anything."
+    → Go straight to demo slide.
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     2 · THE PROBLEM
+═══════════════════════════════════════════ -->
+<section>
+  <div class="slide-inner">
+
+    <p class="eyebrow">The problem</p>
+    <h2>One sentence.<br>Three backend lookups.</h2>
+    <div class="div-line"></div>
+
+    <div class="step-grid">
+      <div class="step-card">
+        <div class="step-num" style="color: var(--amber);">Step 1 &nbsp;·&nbsp; Inventory</div>
+        <p class="step-title">Stock check</p>
+        <p class="step-desc">Is the item available in the right colour, size, and quantity?</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num" style="color: var(--teal);">Step 2 &nbsp;·&nbsp; Pricing</div>
+        <p class="step-title">Price + discounts</p>
+        <p class="step-desc">Apply bulk, SKU, or first-order discount rules automatically.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num" style="color: var(--violet);">Step 3 &nbsp;·&nbsp; Logistics</div>
+        <p class="step-title">Delivery ETA</p>
+        <p class="step-desc">Zone lookup, shipping cost, and estimated arrival date for the pincode.</p>
+      </div>
+    </div>
+
+    <p class="body-sm" style="margin-top: 0.9em;">
+      The agent calls each tool in the right order, handles failures at any step, and returns a complete answer —
+      all from a single natural-language request.
+    </p>
+
+  </div>
+  <aside class="notes">
+    25 seconds. "A customer says: '6 navy jeans, size M, express to Delhi.' Three systems, right order. If stock is out, agent stops after step one — doesn't bother with price or delivery. Let me show you."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     3 · DEMO (warm brown background)
+═══════════════════════════════════════════ -->
+<section data-background-color="#7c4a1a">
+  <div class="slide-inner" style="text-align: center;">
+
+    <p class="eyebrow" style="text-align: center;">Live demonstration</p>
+    <h2 style="font-size: 2.2em; text-align: center; margin-bottom: 0.6em;">Let's see it in action</h2>
+    <p style="font-size: 0.62em; opacity: 0.6; text-align: center;">localhost:3000</p>
+
+  </div>
+  <aside class="notes">
+    DEMO ~4 min. Switch to browser.
+
+    1. Happy path — "2 Blue Shirts, size M → Bangalore"
+       "Watch the trace. Agent reasons → check_stock → price_order → delivery_eta. Three tools, right order, automatic."
+
+    2. Bulk discount — "5 Black Hoodies, size L → Mumbai"
+       "5 items triggers 10% BULK5 discount. The agent figures it out — not hard-coded in the graph."
+
+    3. Out of stock — "3 Olive Hoodies, size M → Bangalore"
+       "Only 2 in stock. in_stock: false. Agent stops — no price, no delivery call. Clean early exit."
+
+    4. Bad pincode — "1 White Polo, size S → 999999"
+       "Not in delivery network. Tool returns error. Agent reads it and tells the customer."
+
+    5. Express + bulk — "6 Navy Jeans, size M → Delhi (express)"
+       "Bulk discount AND express shipping in one run. Notice the 7 steps and elapsed timer."
+
+    → Switch back to slides.
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     4 · REACT PATTERN
+═══════════════════════════════════════════ -->
+<section>
+  <div class="slide-inner">
+
+    <p class="eyebrow">Under the hood</p>
+    <h2>The ReAct Pattern</h2>
+    <div class="div-line"></div>
+
+    <div class="react-diagram">
+      <div class="rn rn-r">
+        <span class="rn-icon">🧠</span>
+        <span class="rn-label">REASON</span>
+        <span class="rn-sub" style="color: var(--primary); opacity: 0.7;">Which tool next?</span>
+      </div>
+      <span class="react-arrow">→</span>
+      <div class="rn rn-a">
+        <span class="rn-icon">🔧</span>
+        <span class="rn-label">ACT</span>
+        <span class="rn-sub" style="color: var(--amber); opacity: 0.7;">Call tool</span>
+      </div>
+      <span class="react-arrow">→</span>
+      <div class="rn rn-o">
+        <span class="rn-icon">👁</span>
+        <span class="rn-label">OBSERVE</span>
+        <span class="rn-sub" style="color: var(--teal); opacity: 0.7;">Read result</span>
+      </div>
+      <span class="react-arrow">↩</span>
+    </div>
+    <p class="react-caption">Loop until LLM emits no tool calls → produces final answer</p>
+
+    <div class="react-facts">
+      <div class="rf">
+        <p class="rf-title">Not a script</p>
+        <p class="rf-body">We give the LLM three tools and a system prompt. It decides which to call, in what order — we don't hard-code the sequence.</p>
+      </div>
+      <div class="rf">
+        <p class="rf-title">Conditional exit</p>
+        <p class="rf-body">When stock is out, the LLM sees <code>in_stock: false</code> and produces a final answer directly. No if-else in our graph code.</p>
+      </div>
+    </div>
+
+  </div>
+  <aside class="notes">
+    60 seconds. "ReAct — Reason, Act, Observe. LLM reasons → emits tool_call → LangGraph runs it → appends result → LLM reads it and reasons again. Loop continues until no tool_calls. That's the exit. Key: we described the tools. The LLM infers the sequence."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     5 · ARCHITECTURE
+═══════════════════════════════════════════ -->
+<section>
+  <div class="slide-inner">
+
+    <p class="eyebrow">Architecture</p>
+    <h2>LangGraph State Machine</h2>
+    <div class="div-line"></div>
+
+    <div class="arch-wrap">
+
+      <div class="arch-box ab-start">START</div>
+      <div class="arch-arr">↓</div>
+
+      <div class="arch-box ab-agent">
+        Agent Node
+        <span class="ab-sub">&nbsp;·&nbsp; LLM + 3 bound tools</span>
+      </div>
+
+      <div class="arch-arr">↓ &nbsp; tool_calls?</div>
+
+      <div class="arch-branch">
+        <div class="arch-col">
+          <div class="arch-arr" style="margin-bottom: 0;">↙ yes</div>
+          <div class="arch-box ab-tools">
+            Tools Node
+            <span class="ab-sub">&nbsp;·&nbsp; check_stock · price_order · delivery_eta</span>
+          </div>
+          <div class="arch-arr">↩ back to agent</div>
+        </div>
+        <div class="arch-col">
+          <div class="arch-arr" style="margin-bottom: 0;">→ no</div>
+          <div class="arch-box ab-end">
+            END
+            <span class="ab-sub">&nbsp;·&nbsp; final answer</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="arch-legend">
+      <p class="al"><strong>State</strong> — message list; <code>add_messages</code> reducer handles merging automatically</p>
+      <p class="al"><strong>Routing</strong> — <code>tools_condition</code> checks last message for tool_calls</p>
+      <p class="al"><strong>Streaming</strong> — <code>astream_events</code> emits tokens + tool events live over SSE</p>
+    </div>
+
+  </div>
+  <aside class="notes">
+    45 seconds. "Two nodes in a loop. Agent calls LLM. If tool_calls come back, route to Tools node, execute, append results, go back. If no tool_calls, go to END. State is just a message list — LangGraph merges it. Now let me open the code."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     6 · CODE WALKTHROUGH TRANSITION (dark)
+═══════════════════════════════════════════ -->
+<section data-background-color="#1c1510">
+  <div class="slide-inner" style="text-align: center;">
+
+    <p class="eyebrow" style="text-align: center;">Codebase walkthrough</p>
+    <h2 style="font-size: 2em; color: #f8f3eb; text-align: center; margin-bottom: 0.5em;">
+      Four files.<br>That's the whole system.
+    </h2>
+    <p class="body-lg" style="text-align: center; color: rgba(248,243,235,0.45); margin-top: 0.6em;">
+      agent.py &nbsp;·&nbsp; tools.py &nbsp;·&nbsp; main.py &nbsp;·&nbsp; page.tsx
+    </p>
+
+  </div>
+  <aside class="notes">
+    Switch to VS Code. One paragraph per file — keep it tight. Use the next slide (file map) as your visual reference.
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     7 · FILE MAP (dark, stays up during walkthrough)
+═══════════════════════════════════════════ -->
+<section data-background-color="#1c1510">
+  <div class="slide-inner">
+
+    <p class="eyebrow">Codebase map</p>
+    <h2 style="color: #f8f3eb; margin-bottom: 0.5em;">What each file does</h2>
+    <div class="div-line" style="background: rgba(255,255,255,0.1);"></div>
+
+    <div class="file-grid">
+      <div class="fc">
+        <div class="fc-name">📄 &nbsp;agent.py</div>
+        <div class="fc-body">
+          LangGraph graph definition · AgentState · async agent_node
+          with 4-attempt exponential backoff retry · tools_condition routing ·
+          per-request model config via RunnableConfig
+        </div>
+      </div>
+      <div class="fc">
+        <div class="fc-name">🔧 &nbsp;tools.py</div>
+        <div class="fc-body">
+          3 @tool-decorated functions · check_stock / price_order / delivery_eta ·
+          reads inventory / discounts / shipping JSON ·
+          returns typed dicts or <code style="background: rgba(255,255,255,0.1); color: #fbbf24;">{"error": ...}</code> on failure
+        </div>
+      </div>
+      <div class="fc">
+        <div class="fc-name">⚡ &nbsp;main.py</div>
+        <div class="fc-body">
+          FastAPI · _stream_agent via astream_events ·
+          SSE events: thought · tool_call · observation · answer ·
+          friendly error messages · /chat /scenarios /health
+        </div>
+      </div>
+      <div class="fc">
+        <div class="fc-name">🖥 &nbsp;app/page.tsx</div>
+        <div class="fc-body">
+          Next.js · SSE consumer · real-time trace renderer ·
+          per-tool observation cards · react-markdown final answer ·
+          model selector · copy + retry buttons
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <aside class="notes">
+    Leave this slide visible while you walk through VS Code.
+
+    agent.py — "Brain. Graph definition — two nodes. agent_node is async: has retry logic, 5s/10s/20s backoff on NVIDIA overload. Reads model override from config so the UI dropdown actually changes the LLM."
+
+    tools.py — "Three @tool functions. Decorator feeds the docstring to the LLM as a tool description. Each reads a JSON data file. Returns typed dict or {error} — the agent reads the error and decides what to say."
+
+    main.py — "_stream_agent runs the graph via astream_events and translates each LangGraph event into a Server-Sent Event. Frontend subscribes and renders as events arrive."
+
+    page.tsx — "SSE consumer, trace panel, structured answer card, react-markdown rendering so bold and bullets display correctly."
+
+    → Switch back to slides.
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     8 · KEY DECISIONS
+═══════════════════════════════════════════ -->
+<section>
+  <div class="slide-inner">
+
+    <p class="eyebrow">Engineering decisions</p>
+    <h2>Three choices that matter</h2>
+    <div class="div-line"></div>
+
+    <div style="margin-top: 0.8em;">
+      <div class="decision">
+        <span class="d-icon">🔄</span>
+        <div>
+          <p class="d-title">LangGraph over plain chains</p>
+          <p class="d-body">Chains are linear — they can't loop. LangGraph is a real state machine: the agent can call tools multiple times, re-read results, and exit when it's ready. That loop is what makes agentic behaviour possible.</p>
+        </div>
+      </div>
+      <div class="decision">
+        <span class="d-icon">📡</span>
+        <div>
+          <p class="d-title">SSE streaming over REST polling</p>
+          <p class="d-body">The agent takes 30–90 seconds. Streaming every thought token, every tool call, every result makes the wait productive — users watch the agent reason in real-time, not stare at a spinner.</p>
+        </div>
+      </div>
+      <div class="decision">
+        <span class="d-icon">⏳</span>
+        <div>
+          <p class="d-title">Exponential backoff for API reliability</p>
+          <p class="d-body">NVIDIA's free-tier returns HTTP 529 "overloaded" under concurrent load. The backend retries silently — 5 s, 10 s, 20 s — up to 4 attempts. Most overload errors clear within one retry. The user never sees it.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <aside class="notes">
+    75 seconds. One decision, one sharp sentence each. Don't rush — these are the technical talking points that show depth.
+    On backoff: mention the async_http_client bug only if asked — one-line wrong parameter name that got forwarded to the OpenAI API. Found by reading the warning log.
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     9 · CONNECTING THE DOTS
+═══════════════════════════════════════════ -->
+<section>
+  <div class="slide-inner">
+
+    <p class="eyebrow">Portfolio arc</p>
+    <h2>Each phase adds one new primitive</h2>
+    <div class="div-line"></div>
+
+    <div class="tl-row">
+      <div class="tl-phase">
+        <div class="tl-dot td-1">P1</div>
+        <div class="tl-label" style="color: var(--primary);">Extract</div>
+        <div class="tl-cap">Structured output from unstructured docs</div>
+      </div>
+      <div class="tl-phase">
+        <div class="tl-dot td-2">P2</div>
+        <div class="tl-label" style="color: var(--amber);">Retrieve</div>
+        <div class="tl-cap">RAG over a real document corpus</div>
+      </div>
+      <div class="tl-phase">
+        <div class="tl-dot td-3">P3</div>
+        <div class="tl-label" style="color: var(--teal);">Evaluate</div>
+        <div class="tl-cap">RAGAS quality gate + LLM judge</div>
+      </div>
+      <div class="tl-phase">
+        <div class="tl-dot td-4">P4</div>
+        <div class="tl-label" style="color: var(--violet);">Act</div>
+        <div class="tl-cap">LLM orchestrates real tools autonomously</div>
+      </div>
+    </div>
+
+    <div class="tl-summary">
+      P1 taught the LLM to produce <strong>structured outputs</strong>.
+      P2 gave it <strong>retrieved context</strong> to reason over.
+      P3 taught us to <strong>measure quality objectively</strong>.
+      P4 gives the LLM <strong>hands — it can now take real actions</strong>, not just generate text.
+    </div>
+
+  </div>
+  <aside class="notes">
+    45 seconds. "Each phase is a standalone demo — but also a building block. P1 was discipline. P2 added context. P3 added rigour. P4 adds agency. The through-line is capability layering."
+  </aside>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     10 · CLOSE
+═══════════════════════════════════════════ -->
+<section>
+  <div class="slide-inner">
+
+    <p class="eyebrow">What's next</p>
+    <h2>P5 — brief incoming</h2>
+    <div class="div-line"></div>
+
+    <p class="body-lg" style="margin-top: 0.8em;">
+      The foundations are in place — structured output, retrieval, evaluation, tool-calling.
+      P5 layers on the next frontier of agentic complexity:
+      <strong style="color: var(--fg);">memory, multi-agent coordination, or production hardening</strong>.
+    </p>
+
+    <div class="blockquote">
+      <p class="bq-text">
+        "The goal isn't demos that work once. It's production patterns you can justify in a design review."
+      </p>
+    </div>
+
+  </div>
+  <aside class="notes">
+    20 seconds. "P5 brief coming soon. The goal of this portfolio isn't just working demos — it's internalising the engineering patterns that come up in real AI work. So when they surface in an interview or a design review, I can speak to them from actual implementation. That's P4. Questions?"
+  </aside>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash:            true,
+    slideNumber:     'c/t',
+    progress:        true,
+    transition:      'fade',
+    transitionSpeed: 'fast',
+    width:           1200,
+    height:          700,
+    margin:          0.05,
+    plugins:         [],
+  });
+</script>
+</body>
+</html>
