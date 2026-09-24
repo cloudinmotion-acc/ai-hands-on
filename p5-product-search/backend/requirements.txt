@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+psycopg2-binary
+pgvector
+pandas
+openpyxl
+openai
+httpx
+python-dotenv
+rank_bm25
+langchain
+langchain-openai
+langchain-core
+langgraph
+fastmcp

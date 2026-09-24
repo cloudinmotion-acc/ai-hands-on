@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P5 Speaker Notes — Hybrid Product Search</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:#07071a; --side:#0d0d2b; --card:rgba(255,255,255,.04);
+  --cb:rgba(255,255,255,.07); --bd:#1a1a3a;
+  --teal:#14b8a6; --purp:#8b5cf6; --grn:#10b981; --amr:#f59e0b;
+  --red:#ef4444; --blue:#3b82f6;
+  --txt:#e8e8f0; --mut:#7070a0; --cdbg:rgba(0,0,0,.45);
+}
+body { font-family:'Segoe UI',-apple-system,sans-serif; background:var(--bg); color:var(--txt);
+  display:flex; height:100vh; overflow:hidden; font-size:14px; }
+
+/* SIDEBAR */
+#sidebar {
+  width:220px; flex-shrink:0; background:var(--side);
+  border-right:1px solid var(--bd); overflow-y:auto; padding:16px 0;
+  scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.08) transparent;
+}
+#sidebar::-webkit-scrollbar{width:3px;}
+#sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);}
+.sidetitle { padding:0 16px 14px; font-size:10px; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--mut); }
+.nav-item { display:flex; align-items:flex-start; gap:10px; padding:9px 16px;
+  cursor:pointer; border-left:2px solid transparent; transition:all .2s; }
+.nav-item:hover { background:rgba(255,255,255,.04); }
+.nav-item.active { border-left-color:var(--teal); background:rgba(20,184,166,.07); }
+.nav-num { font-size:10px; color:var(--mut); font-weight:600; min-width:18px;
+  padding-top:1px; font-variant-numeric:tabular-nums; }
+.nav-item.active .nav-num { color:var(--teal); }
+.nav-label { font-size:12px; line-height:1.4; color:var(--mut); }
+.nav-item.active .nav-label { color:var(--txt); }
+
+/* TIMER BAR */
+#timerbar { position:fixed; top:0; right:0;
+  width:calc(100vw - 220px); background:rgba(0,0,0,.55);
+  border-bottom:1px solid var(--bd); padding:8px 24px;
+  display:flex; align-items:center; gap:16px; z-index:99; backdrop-filter:blur(6px); }
+#timer { font-size:26px; font-weight:800; font-variant-numeric:tabular-nums;
+  color:var(--teal); letter-spacing:.04em; }
+#timer.warn { color:var(--amr); }
+#timer.over { color:var(--red); }
+.tbtn { padding:5px 14px; border-radius:6px; font-size:11px; font-weight:600;
+  cursor:pointer; border:1px solid; transition:all .2s; }
+.tbtn-rst { border-color:rgba(20,184,166,.35); color:var(--teal); background:rgba(20,184,166,.08); }
+.tbtn-rst:hover { background:rgba(20,184,166,.18); }
+.tinfo { font-size:11px; color:var(--mut); margin-left:auto; }
+
+/* MAIN */
+#main { flex:1; overflow-y:auto; padding:64px 0 80px;
+  scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.08) transparent; }
+#main::-webkit-scrollbar{width:4px;}
+#main::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px;}
+
+.slide-block { padding:36px 40px; border-bottom:1px solid var(--bd); }
+.slide-block:last-child { border-bottom:none; }
+.slide-anchor { display:block; position:relative; top:-70px; visibility:hidden; }
+
+.shead { display:flex; align-items:flex-start; gap:14px; margin-bottom:22px; }
+.snumber { background:linear-gradient(135deg,var(--teal),var(--purp));
+  width:36px; height:36px; border-radius:8px; display:flex; align-items:center;
+  justify-content:center; font-size:13px; font-weight:800; flex-shrink:0; color:#fff; }
+.stitle { font-size:18px; font-weight:700; line-height:1.3; padding-top:2px; }
+.sdur { font-size:11px; color:var(--mut); margin-top:2px; }
+
+.note-block { border-radius:8px; padding:14px 17px; margin-bottom:12px; line-height:1.65; }
+.note-block p { margin-bottom:8px; font-size:13.5px; }
+.note-block p:last-child { margin-bottom:0; }
+.note-block ul { margin:6px 0 0 18px; }
+.note-block ul li { font-size:13px; margin-bottom:5px; line-height:1.55; }
+.note-block strong { font-weight:700; }
+
+.say  { background:rgba(59,130,246,.08);  border-left:3px solid var(--blue);  }
+.teach{ background:rgba(20,184,166,.07);  border-left:3px solid var(--teal);  }
+.warn { background:rgba(245,158,11,.07);  border-left:3px solid var(--amr);   }
+.danger{background:rgba(239,68,68,.07);  border-left:3px solid var(--red);    }
+.code { background:rgba(139,92,246,.07);  border-left:3px solid var(--purp);  }
+
+.label { font-size:9px; font-weight:800; letter-spacing:.13em; text-transform:uppercase;
+  margin-bottom:7px; display:block; }
+.say .label   { color:var(--blue); }
+.teach .label { color:var(--teal); }
+.warn .label  { color:var(--amr); }
+.danger .label{ color:var(--red); }
+.code .label  { color:var(--purp); }
+
+code { font-family:'Consolas','SF Mono',monospace; font-size:.86em;
+  background:rgba(0,0,0,.3); padding:1px 5px; border-radius:4px; color:#5eead4; }
+pre { font-family:'Consolas','SF Mono',monospace; font-size:11.5px;
+  background:var(--cdbg); border:1px solid rgba(255,255,255,.06);
+  border-radius:7px; padding:12px 14px; line-height:1.65;
+  overflow-x:auto; white-space:pre; color:#c9d1d9; margin:8px 0; }
+
+.qa-box { background:rgba(255,255,255,.03); border:1px solid var(--cb);
+  border-radius:8px; padding:13px 16px; margin-bottom:9px; }
+.qa-q { font-size:12px; color:var(--mut); margin-bottom:7px; line-height:1.4; }
+.qa-q::before { content:'Q: '; color:var(--amr); font-weight:700; }
+.qa-a { font-size:13px; line-height:1.6; }
+
+.timing-grid { display:grid; grid-template-columns:auto 1fr auto; gap:5px 14px;
+  align-items:center; font-size:12px; }
+.tg-num { color:var(--mut); font-variant-numeric:tabular-nums; }
+.tg-name { color:var(--txt); }
+.tg-time { color:var(--teal); font-weight:700; text-align:right; white-space:nowrap; }
+
+.chip { display:inline-block; padding:3px 10px;
+  background:rgba(20,184,166,.12); border:1px solid rgba(20,184,166,.25);
+  border-radius:20px; font-size:10px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:#5eead4; margin-bottom:14px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR NAV -->
+<nav id="sidebar">
+  <div class="sidetitle">P5 Speaker Notes</div>
+  <div id="nav-list">
+    <div class="nav-item active" onclick="scrollTo(1)">
+      <span class="nav-num">01</span>
+      <span class="nav-label">Title</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo(2)">
+      <span class="nav-num">02</span>
+      <span class="nav-label">Why Hybrid?</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo(3)">
+      <span class="nav-num">03</span>
+      <span class="nav-label">Architecture</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo(4)">
+      <span class="nav-num">04</span>
+      <span class="nav-label">Decomposer</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo(5)">
+      <span class="nav-num">05</span>
+      <span class="nav-label">Three Retrievers</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo(6)">
+      <span class="nav-num">06</span>
+      <span class="nav-label">RRF Merge</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo(7)">
+      <span class="nav-num">07</span>
+      <span class="nav-label">Hard Filter</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo(8)">
+      <span class="nav-num">08</span>
+      <span class="nav-label">MCP + Agent</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo(9)">
+      <span class="nav-num">09</span>
+      <span class="nav-label">SSE + Mismatch UI</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo(10)">
+      <span class="nav-num">10</span>
+      <span class="nav-label">Eval Results</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo(11)">
+      <span class="nav-num">11</span>
+      <span class="nav-label">Design Decisions</span>
+    </div>
+    <div class="nav-item" onclick="scrollTo(12)">
+      <span class="nav-num">12</span>
+      <span class="nav-label">Q&amp;A</span>
+    </div>
+  </div>
+</nav>
+
+<!-- TIMER BAR -->
+<div id="timerbar">
+  <div id="timer">00:00</div>
+  <button class="tbtn tbtn-rst" onclick="resetTimer()">Reset</button>
+  <span class="tinfo">Target: ~20 min total &nbsp;·&nbsp; Scroll in main pane = notes advance</span>
+</div>
+
+<!-- MAIN NOTES -->
+<div id="main">
+
+  <!-- ═══ SLIDE 1 — TITLE ══════════════════════════════════════════ -->
+  <div class="slide-block" id="block-1">
+    <a class="slide-anchor" id="anchor-1"></a>
+    <div class="shead">
+      <div class="snumber">1</div>
+      <div>
+        <div class="stitle">Title — Hybrid Product Search</div>
+        <div class="sdur">~1 min &nbsp;·&nbsp; Orientation</div>
+      </div>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">Say</span>
+      <p>P5 is the most technically complex phase in this portfolio — it combines three completely different retrieval strategies and merges them into a single ranked output. Everything you see on the screen — the product cards, the mismatch badges, the streaming answer — is produced by a 7-step pipeline that runs on every query.</p>
+    </div>
+    <div class="note-block teach">
+      <span class="label">Frame for the audience</span>
+      <p>This isn't a demo of a product search box. It's a systems demo of how you build retrieval when you can't afford for any single approach to be a single point of failure. The product search domain is just an easy-to-understand vehicle for the underlying architecture.</p>
+    </div>
+    <div class="note-block warn">
+      <span class="label">Timing note</span>
+      <p>Start the timer now. Slide 1 should take no more than 60 seconds — you're just setting context, not explaining anything yet.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2 — WHY HYBRID ════════════════════════════════════ -->
+  <div class="slide-block" id="block-2">
+    <a class="slide-anchor" id="anchor-2"></a>
+    <div class="shead">
+      <div class="snumber">2</div>
+      <div>
+        <div class="stitle">Why Hybrid? Single Retriever Failures</div>
+        <div class="sdur">~2 min &nbsp;·&nbsp; Motivation</div>
+      </div>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">Say</span>
+      <p>Let me show you what happens when you use just one retriever. These aren't hypotheticals — each of these failures is directly observable from the eval data.</p>
+      <ul>
+        <li><strong>SQL only:</strong> "cozy winter jacket" → 0 rows. The catalogue says "puffer jacket". SQL does exact column matching — it can't handle synonym drift.</li>
+        <li><strong>BM25 only:</strong> "ethnic kurta for girls" → surfaces men's kurtas. BM25 finds everything with "kurta" in the name, and there are more men's kurtas than girls'. It doesn't know gender matters.</li>
+        <li><strong>Vector only:</strong> "lion print t-shirt for kids" → wrong item. "Lion print" is specific enough that BM25 precision matters more than semantic understanding.</li>
+      </ul>
+    </div>
+    <div class="note-block teach">
+      <span class="label">Key insight to land</span>
+      <p>Each retriever has a different failure mode: SQL fails on language, BM25 fails on intent, vector fails on specificity. The only way to handle all three is to combine them. That's the architecture we built.</p>
+    </div>
+    <div class="note-block code">
+      <span class="label">Code reference if asked</span>
+      <p>The adaptive pool size logic is in <code>mcp_server.py:79</code>:</p>
+      <pre>pool_k = top_k * 4 if filters else top_k * 2</pre>
+      <p>This is the implementation evidence that we thought carefully about how these retrievers interact — not just that they run together.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 3 — ARCHITECTURE ══════════════════════════════════ -->
+  <div class="slide-block" id="block-3">
+    <a class="slide-anchor" id="anchor-3"></a>
+    <div class="shead">
+      <div class="snumber">3</div>
+      <div>
+        <div class="stitle">7-Step Pipeline Architecture</div>
+        <div class="sdur">~2 min &nbsp;·&nbsp; Overview</div>
+      </div>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">Say</span>
+      <p>Every user query goes through exactly these 7 steps. Steps 2–4 are functionally parallel — they all get input from step 1 but don't depend on each other.</p>
+      <ul>
+        <li>Step 1: Decomposer (LLM splits query into semantic + structured parts)</li>
+        <li>Steps 2–4: SQL + BM25 + vector all run on the expanded pool</li>
+        <li>Step 5: RRF merges the three ranked lists</li>
+        <li>Step 6: Hard filter gates out wrong-gender items</li>
+        <li>Step 7: LangGraph agent wraps everything, streams answer via SSE</li>
+      </ul>
+    </div>
+    <div class="note-block teach">
+      <span class="label">File map for technical audience</span>
+      <p>Point to each box and name the file:</p>
+      <ul>
+        <li>Decomposer → <code>search/decomposer.py</code></li>
+        <li>SQL filter → <code>search/sql_filter.py</code></li>
+        <li>BM25 → <code>search/bm25_retriever.py</code></li>
+        <li>pgvector → <code>search/vector_retriever.py</code></li>
+        <li>RRF merge → <code>search/merger.py</code></li>
+        <li>Hard filter + orchestration → <code>mcp_server.py</code></li>
+        <li>Agent → <code>agent.py</code></li>
+      </ul>
+    </div>
+    <div class="note-block warn">
+      <span class="label">Don't get lost here</span>
+      <p>This slide is just orientation. You'll explain each component on subsequent slides. Don't spend more than 2 minutes — just give people the mental map so they know where they're going.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4 — DECOMPOSER ════════════════════════════════════ -->
+  <div class="slide-block" id="block-4">
+    <a class="slide-anchor" id="anchor-4"></a>
+    <div class="shead">
+      <div class="snumber">4</div>
+      <div>
+        <div class="stitle">LLM Query Decomposer</div>
+        <div class="sdur">~2 min &nbsp;·&nbsp; Technical depth</div>
+      </div>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">Say</span>
+      <p>The decomposer is the first LLM call in every pipeline execution. It takes the raw user query and splits it into two outputs: a <em>semantic query</em> — clean natural language for BM25 and vector — and a <em>filters</em> dict with structured key-value pairs for SQL.</p>
+      <p>For "white cotton dress for girls under ₹500 in stock", it returns semantic_query "white cotton dress" and filters with colour=white, fabric=cotton, gender=girls, max_price=500, in_stock=true.</p>
+    </div>
+    <div class="note-block teach">
+      <span class="label">Why this matters technically</span>
+      <p>The naive approach is to pass the full query to all three retrievers. But if you send "comfortable yoga pants for women in stock under ₹800" to BM25, the stop words and price clause degrade the score. The decomposer strips exactly what each retriever doesn't need.</p>
+    </div>
+    <div class="note-block code">
+      <span class="label">Code reference — decomposer.py:41-64</span>
+      <p>The system prompt bans the <code>category</code> key explicitly:</p>
+      <pre>"Do NOT include a 'category' key — it is not a valid filter."</pre>
+      <p>This rule was added after the eval showed <code>WHERE category='women'</code> returning 0 rows — the DB column stores item types like "pants" not demographic groups. This is an example of eval-driven prompt iteration.</p>
+    </div>
+    <div class="note-block code">
+      <span class="label">Code reference — decomposer.py:86-100</span>
+      <p>Defensive parsing — strip markdown fences if LLM wraps JSON, then fallback to raw query if JSON parse fails:</p>
+      <pre>if raw.startswith("```"):
+    raw = raw.split("```")[1]
+    if raw.startswith("json"):
+        raw = raw[4:]
+# fallback if anything fails
+return {"semantic_query": query, "filters": {}}</pre>
+      <p>Temperature=0 here — the decomposer must be deterministic. You're using it as a structured parser, not a creative generator.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5 — THREE RETRIEVERS ══════════════════════════════ -->
+  <div class="slide-block" id="block-5">
+    <a class="slide-anchor" id="anchor-5"></a>
+    <div class="shead">
+      <div class="snumber">5</div>
+      <div>
+        <div class="stitle">Three Retrievers</div>
+        <div class="sdur">~2.5 min &nbsp;·&nbsp; Technical depth</div>
+      </div>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">SQL — say</span>
+      <p>SQL filter takes the structured <code>filters</code> dict and builds a parametric WHERE clause. All conditions are AND-ed — it's an exact match against structured columns. It gets the <em>structured filters</em>, not the semantic query.</p>
+    </div>
+    <div class="note-block code">
+      <span class="label">Code reference — sql_filter.py:43-73</span>
+      <pre>if gen := filters.get("gender"):
+    conditions.append("LOWER(gender) = LOWER(%s)")
+    params.append(gen)
+if (mx := filters.get("max_price")):
+    conditions.append("price <= %s")
+    params.append(int(mx))</pre>
+      <p>Parametric queries — no string formatting, no injection risk.</p>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">BM25 — say</span>
+      <p>BM25 index is built on all 65 products at module import — name plus description concatenated, tokenized to <code>[a-z0-9]+</code> tokens. It stays in memory. Zero latency after startup. Items with BM25 score of exactly 0 are excluded — they're not real keyword matches.</p>
+    </div>
+    <div class="note-block code">
+      <span class="label">Code reference — bm25_retriever.py</span>
+      <pre>def _tokenize(text):
+    return re.findall(r"[a-z0-9]+", text.lower())
+
+scores = _bm25.get_scores(tokens)
+# zip with product list, exclude 0s</pre>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">Vector — say</span>
+      <p>pgvector with NVIDIA's nv-embedqa-e5-v5 model — 2048 dimensions. The distinction between <code>input_type="passage"</code> at ingest vs <code>"query"</code> at search time is important — these models use different prompt prefixes for each mode. Cosine similarity via the <code>&lt;=&gt;</code> operator in PostgreSQL.</p>
+    </div>
+    <div class="note-block warn">
+      <span class="label">Anticipate this question</span>
+      <p>If asked "why 2048 dimensions": that's the model's native dimensionality. More dims = better retrieval quality at the cost of storage and distance computation. We use it because NVIDIA NIM hosts it and it's available via our API key.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6 — RRF MERGE ══════════════════════════════════════ -->
+  <div class="slide-block" id="block-6">
+    <a class="slide-anchor" id="anchor-6"></a>
+    <div class="shead">
+      <div class="snumber">6</div>
+      <div>
+        <div class="stitle">RRF Merge</div>
+        <div class="sdur">~2.5 min &nbsp;·&nbsp; Algorithm</div>
+      </div>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">Say</span>
+      <p>The core insight of RRF is that you don't need calibrated scores to merge ranked lists. You only need ranks. Each item gets a contribution of <code>1 / (60 + rank)</code> from each list it appears in. The 60 is the smoothing constant from the original Cormack 2009 paper — it dampens the difference between rank 1 and rank 5, so you don't get all-or-nothing behavior at the top.</p>
+    </div>
+    <div class="note-block code">
+      <span class="label">Code reference — merger.py:38</span>
+      <pre>_K = 60  # RRF smoothing constant
+
+for rank, product in enumerate(ranked, start=1):
+    pid = product["id"]
+    rrf_scores[pid] = (
+        rrf_scores.get(pid, 0.0)
+        + 1.0 / (_K + rank)
+    )</pre>
+    </div>
+    <div class="note-block teach">
+      <span class="label">Explain with numbers</span>
+      <p>A product that appears in all three lists at rank 3, 1, and 5:</p>
+      <pre>1/(60+3) + 1/(60+1) + 1/(60+5) = 0.0159 + 0.0164 + 0.0154 = 0.0477</pre>
+      <p>A product that only appears in BM25 at rank 1:</p>
+      <pre>1/(60+1) = 0.0164</pre>
+      <p>The multi-list product scores 2.9× higher — it's validated by multiple evidence sources. That's the key property of RRF.</p>
+    </div>
+    <div class="note-block teach">
+      <span class="label">Why not learned rank fusion?</span>
+      <p>Learned rank fusion (like LambdaRank or Reciprocal Rank Fusion with learned weights) requires training data with relevance labels. We have 15 labelled queries — that's not enough. RRF is unsupervised and works well from day zero. You'd switch to learned fusion once you have thousands of logged queries with user click signals.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 7 — HARD FILTER ════════════════════════════════════ -->
+  <div class="slide-block" id="block-7">
+    <a class="slide-anchor" id="anchor-7"></a>
+    <div class="shead">
+      <div class="snumber">7</div>
+      <div>
+        <div class="stitle">Post-RRF Hard Filter</div>
+        <div class="sdur">~2 min &nbsp;·&nbsp; Design decision</div>
+      </div>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">Say — the failure first</span>
+      <p>Q11: "ethnic kurta for girls". Before this fix, hybrid P@5 was 0.00. Here's exactly what went wrong: BM25 finds all products with "kurta" in name or description — there are six, all men's or women's. They rank #1–#4 in BM25. The only girls item, Yellow Anarkali Suit (ID 23), doesn't have "kurta" in its description — it's an anarkali. BM25 never sees it. Vector gives it a moderate score but men's kurtas still dominate the RRF merge because they appear in BM25 AND vector. After RRF: men's kurtas at positions 1–4, girls item nowhere in top 5.</p>
+    </div>
+    <div class="note-block say">
+      <span class="label">Say — the fix</span>
+      <p>The solution is to apply a hard demographic gate <em>after</em> RRF, not before. We merge 40 items (4× pool), then drop everything that doesn't match the requested gender. With men's and women's kurtas gone, ID 23 surfaces. P@5 goes from 0.00 to 0.20.</p>
+    </div>
+    <div class="note-block code">
+      <span class="label">Code reference — mcp_server.py:33-50</span>
+      <pre>def _hard_filter(products, filters):
+    gender_want = str(filters.get("gender", "")).lower()
+    stock_needed = filters.get("in_stock") is True
+    for p in products:
+        if gender_want:
+            pg = p.get("gender", "").lower()
+            if pg != gender_want and pg != "unisex":
+                continue  # drop wrong gender
+        if stock_needed and not p.get("in_stock"):
+            continue
+        out.append(p)</pre>
+    </div>
+    <div class="note-block teach">
+      <span class="label">Explain the soft/hard distinction</span>
+      <p>Gender and in_stock are hard gates — showing a men's item when you asked for girls is a wrong result, full stop. Colour and fabric are soft — showing a cotton dress when you asked for silk is a near-match, which is better than showing nothing. The mismatch UI (slide 9) handles the communication gap for soft mismatches.</p>
+    </div>
+    <div class="note-block warn">
+      <span class="label">The unisex edge case</span>
+      <p>Without <code>pg != "unisex"</code> in the condition, ID 31 (Oversized Cozy Hoodie, unisex) got dropped when the user searched "fleece hoodie for men". A unisex item is a valid result for any gender. This is the kind of edge case you only find by running eval against real data.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8 — MCP + AGENT ════════════════════════════════════ -->
+  <div class="slide-block" id="block-8">
+    <a class="slide-anchor" id="anchor-8"></a>
+    <div class="shead">
+      <div class="snumber">8</div>
+      <div>
+        <div class="stitle">MCP Tool + LangGraph ReAct Agent</div>
+        <div class="sdur">~2 min &nbsp;·&nbsp; Agentic layer</div>
+      </div>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">Say — MCP</span>
+      <p>The entire 7-step pipeline is wrapped as a single MCP tool: <code>search_products(query, top_k)</code>. The LangGraph agent doesn't know about SQL, BM25, vector, or RRF. It just calls one tool and gets back a JSON payload with decomposed filters and results. That's the MCP value proposition — complexity behind a clean tool interface.</p>
+    </div>
+    <div class="note-block code">
+      <span class="label">Code reference — mcp_server.py:53</span>
+      <pre>@mcp.tool()
+def search_products(query: str, top_k: int = 10) -> str:
+    decomposed = decomposer.decompose(query)
+    # ... pool sizing, three retrievers, RRF, hard filter ...
+    return json.dumps({"decomposed": decomposed, "results": merged})</pre>
+      <p>In-process bridge: the agent file directly imports <code>search_products</code> from <code>mcp_server.py</code> — no subprocess, no port, no serialisation round-trip. Same MCP tool interface as if it were running over stdio or HTTP, but zero added latency.</p>
+    </div>
+    <div class="note-block say">
+      <span class="label">Say — LangGraph</span>
+      <p>The agent is a LangGraph ReAct state machine: agent_node checks if there are tool_calls in the last message. If yes, ToolNode executes them. should_continue decides whether to loop back or end. The system prompt says "call search_products EXACTLY ONCE per request" — this was necessary because without it, the model would call the tool twice then synthesize.</p>
+    </div>
+    <div class="note-block teach">
+      <span class="label">4-attempt backoff — why</span>
+      <p>NVIDIA NIM returns HTTP 429 under load. The agent_node retries up to 4 times with exponential backoff: 5s → 10s → 20s. Without this, the entire request fails on the first NVIDIA overload spike. The code is in <code>agent.py</code> inside the try/except around <code>llm.invoke()</code>.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9 — UI + SSE ═══════════════════════════════════════ -->
+  <div class="slide-block" id="block-9">
+    <a class="slide-anchor" id="anchor-9"></a>
+    <div class="shead">
+      <div class="snumber">9</div>
+      <div>
+        <div class="stitle">SSE Streaming + Mismatch UI</div>
+        <div class="sdur">~2 min &nbsp;·&nbsp; Frontend + UX</div>
+      </div>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">Say — SSE</span>
+      <p>The frontend receives four SSE event types in sequence as the agent runs: <code>tool_call</code> → shows a spinner with the tool name; <code>tool_result</code> → shows decomposed filters and product cards; <code>final_answer</code> → streams the AI text; <code>done</code> → stops the spinner. The user sees products before the AI finishes writing its answer.</p>
+    </div>
+    <div class="note-block code">
+      <span class="label">Code reference — main.py SSE events</span>
+      <pre>data: {"type":"tool_call", "tool":"search_products", ...}
+data: {"type":"tool_result", "decomposed":{...}, "top_results":[...]}
+data: {"type":"final_answer", "content":"..."}
+data: {"type":"done"}</pre>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">Say — mismatch badges</span>
+      <p>The mismatch highlighting is a pure frontend feature. The <code>tool_result</code> event already contains both the decomposed filters and each product's attributes. <code>computeMismatches()</code> diffs them client-side. If a product's fabric doesn't match the searched fabric, the badge turns amber with a warning icon. No backend change was needed — the data was already there.</p>
+    </div>
+    <div class="note-block code">
+      <span class="label">Code reference — page.tsx:53-79</span>
+      <pre>if (filters.fabric && s(product.fabric) !== s(filters.fabric))
+    mismatches.add("fabric");  // → amber badge
+
+if (filters.gender) {
+    const pg = s(product.gender);
+    if (pg !== s(filters.gender) && pg !== "unisex")
+        mismatches.add("gender");
+}</pre>
+    </div>
+    <div class="note-block teach">
+      <span class="label">The UX design rationale</span>
+      <p>Returning near-matches when no exact match exists is the right retrieval behaviour — showing nothing is worse. But showing a cotton blouse in response to "silk blouse" without telling the user it's cotton is misleading. The amber badge says: "we know this isn't perfect, here's why." That's product integrity.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 10 — EVAL RESULTS ══════════════════════════════════ -->
+  <div class="slide-block" id="block-10">
+    <a class="slide-anchor" id="anchor-10"></a>
+    <div class="shead">
+      <div class="snumber">10</div>
+      <div>
+        <div class="stitle">Eval Results — Precision@5</div>
+        <div class="sdur">~2 min &nbsp;·&nbsp; Numbers</div>
+      </div>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">Say</span>
+      <p>15 queries across 3 retrieval modes. Precision@5 is the fraction of the top-5 results that are expected matches — denominator is <code>min(5, actual result count)</code> so we don't penalise for catalogue gaps. BM25 averages 0.28, vector 0.32, hybrid 0.32. Hybrid matches vector precision but adds structural filter enforcement that vector-only can't provide.</p>
+    </div>
+    <div class="note-block code">
+      <span class="label">Code reference — eval/run_eval.py:45</span>
+      <pre>def precision_at_k(results, expected_ids, k):
+    top_ids = [r["id"] for r in results[:k]]
+    hits = sum(1 for pid in top_ids if pid in expected_ids)
+    return hits / min(k, len(top_ids))</pre>
+    </div>
+    <div class="note-block teach">
+      <span class="label">Explain the key results</span>
+      <ul>
+        <li><strong>Q4 (yoga pants for women in stock):</strong> No "yoga pants" in catalogue. Hybrid scores 0.60 — vector understands "yoga pants" → "elasticated wide-leg pants" even without the exact keyword</li>
+        <li><strong>Q11 (ethnic kurta for girls):</strong> 0.00 → 0.20 after post-RRF hard filter. The fix is visible in the numbers.</li>
+        <li><strong>Q2 (lion print t-shirt for kids):</strong> BM25 = 1.00. Exact keyword match — BM25 wins when the text is there.</li>
+        <li><strong>Q8 (kids under ₹300):</strong> SQL = 1.00. Pure structured query — SQL wins when you need exact numeric filtering.</li>
+      </ul>
+    </div>
+    <div class="note-block warn">
+      <span class="label">Anticipate "why only 0.32?"</span>
+      <p>Many queries have only 1 expected item in the catalogue (Q2, Q3, Q5, Q7, Q11, Q14, Q15). Finding that one item in top-5 gives P@5 = 0.20 — that's the theoretical max for those queries. The system is performing correctly; the eval numbers just reflect catalogue coverage. A richer catalogue would show higher absolute scores.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 11 — DESIGN DECISIONS ══════════════════════════════ -->
+  <div class="slide-block" id="block-11">
+    <a class="slide-anchor" id="anchor-11"></a>
+    <div class="shead">
+      <div class="snumber">11</div>
+      <div>
+        <div class="stitle">Five Design Decisions</div>
+        <div class="sdur">~1.5 min &nbsp;·&nbsp; Reflection</div>
+      </div>
+    </div>
+
+    <div class="note-block say">
+      <span class="label">Say</span>
+      <p>Every system has decisions that look obvious in hindsight. These five weren't — they came out of debugging eval failures.</p>
+      <ul>
+        <li><strong>Remove category from decomposer:</strong> Eval showed <code>WHERE category='women'</code> → 0 rows. The DB column stores item types, not demographics. Fixed Q4 from 0.40 to 0.60.</li>
+        <li><strong>Adaptive pool sizing:</strong> Flat 4× pool for all queries hurt open queries like "floral print summer dress" — too many items competing in RRF. Adaptive: 4× with filters, 2× without.</li>
+        <li><strong>Unisex pass-through:</strong> Hard filter initially dropped unisex items. An oversized hoodie for everyone is a valid result for "hoodie for men". One line fix.</li>
+        <li><strong>In-process MCP bridge:</strong> Direct import instead of subprocess. Zero latency overhead on the tool call boundary. Same interface if you ever want to move to HTTP transport.</li>
+        <li><strong>Mismatch UI as product integrity:</strong> The decision to show near-matches AND flag them is a product decision, not just engineering. It's honest retrieval.</li>
+      </ul>
+    </div>
+    <div class="note-block teach">
+      <span class="label">Framing for interview</span>
+      <p>The through-line across all five decisions is: <em>eval-driven iteration</em>. You set up an eval, ran it, found failures, fixed them, re-ran. That loop — not the initial architecture — is what produces a reliable system. The architecture is a starting hypothesis. The eval tells you where it's wrong.</p>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 12 — Q&A ════════════════════════════════════════════ -->
+  <div class="slide-block" id="block-12">
+    <a class="slide-anchor" id="anchor-12"></a>
+    <div class="shead">
+      <div class="snumber">12</div>
+      <div>
+        <div class="stitle">Q&amp;A — Likely Questions</div>
+        <div class="sdur">~3 min &nbsp;·&nbsp; Discussion</div>
+      </div>
+    </div>
+
+    <div class="chip">Anticipated Questions</div>
+
+    <div class="qa-box">
+      <div class="qa-q">How does RRF compare to a learned ranking model like LambdaRank?</div>
+      <div class="qa-a">Learned ranking is better when you have thousands of labelled query-result pairs with click signals. We have 15 labelled queries — not enough. RRF is unsupervised and works from day zero. In production at scale, you'd collect user interaction data for 3–6 months, then train a ranker on top of the RRF output. RRF stays as a baseline to beat.</div>
+    </div>
+
+    <div class="qa-box">
+      <div class="qa-q">Why use MCP if it's just one tool and one agent?</div>
+      <div class="qa-a">Two reasons: (1) The tool boundary lets you swap the backend completely — you could replace the SQL+BM25+vector pipeline with a different approach without changing any agent code. (2) If you add more tools later (cart, order history, recommendations), the agent already speaks MCP — no refactor. It's an interface investment.</div>
+    </div>
+
+    <div class="qa-box">
+      <div class="qa-q">What would you change if this went to production?</div>
+      <div class="qa-a">Three things: (1) Async BM25 refresh — currently the index is built at startup and never updated. A cron job or PostgreSQL trigger would rebuild it when products change. (2) pgvector HNSW index — currently linear scan over 65 items. For 100K+ products, you need an approximate nearest-neighbour index (<code>CREATE INDEX ON products USING hnsw (embedding vector_cosine_ops)</code>). (3) Replace <code>httpx.Client(verify=False)</code> with the Accenture CA bundle — that's a corporate proxy workaround, not production-safe.</div>
+    </div>
+
+    <div class="qa-box">
+      <div class="qa-q">Why is the decomposer temperature=0 but the agent model temperature is higher?</div>
+      <div class="qa-a">The decomposer is a parser — it must produce deterministic, well-formed JSON. Temperature=0 eliminates sampling variance. The agent needs to write natural language answers — some creative variation is fine and even desirable. Temperature=1 for gpt-oss-20b judge in the P3 eval was a RAGAS quirk; here the agent uses the default nemotron temperature setting.</div>
+    </div>
+
+    <div class="qa-box">
+      <div class="qa-q">How do you handle queries where the catalogue genuinely has nothing relevant?</div>
+      <div class="qa-a">The hard filter has a fallback: if <code>len(filtered) &lt; max(1, top_k // 4)</code>, we return the unfiltered RRF results rather than an empty list. The mismatch badges then flag that the results don't fully match the query. The agent's final answer synthesizes this honestly — "we don't carry silk blouses under ₹800, here's the closest we have."</div>
+    </div>
+
+    <div class="note-block warn" style="margin-top:16px;">
+      <span class="label">Closing</span>
+      <p>End with: "The key engineering lessons from P5 are: no single retriever handles all query types, RRF gives you a principled way to merge them without score calibration, and an automated eval loop is how you find the edge cases before your users do."</p>
+    </div>
+  </div>
+
+</div><!-- /#main -->
+
+<script>
+// ── Timing suggestions per slide (minutes)
+const TARGETS = [1, 2, 2, 2, 2.5, 2.5, 2, 2, 2, 2, 1.5, 3];
+const TOTAL_MIN = TARGETS.reduce((a,b)=>a+b, 0);
+
+// ── Timer
+let start = Date.now(), timerPaused = false, _interval;
+function pad(n){ return String(Math.floor(n)).padStart(2,'0'); }
+function tick(){
+  const elapsed = Math.floor((Date.now() - start) / 1000);
+  const m = Math.floor(elapsed / 60), s = elapsed % 60;
+  const el = document.getElementById('timer');
+  el.textContent = pad(m) + ':' + pad(s);
+  const totalSec = TOTAL_MIN * 60;
+  if (elapsed > totalSec + 120) { el.className='over'; }
+  else if (elapsed > totalSec) { el.className='warn'; }
+  else { el.className=''; }
+}
+_interval = setInterval(tick, 500);
+function resetTimer(){ start = Date.now(); }
+
+// ── Scroll-spy
+const N = 12;
+const anchors = [];
+for (let i=1; i<=N; i++){
+  const a = document.getElementById('anchor-'+i);
+  if (a) anchors.push({i, top: a.getBoundingClientRect().top});
+}
+
+const mainEl = document.getElementById('main');
+const navItems = document.querySelectorAll('.nav-item');
+
+function updateActive(){
+  const scrollTop = mainEl.scrollTop;
+  let active = 1;
+  for (let i=1; i<=N; i++){
+    const block = document.getElementById('block-'+i);
+    if (!block) continue;
+    if (block.offsetTop - 80 <= scrollTop) active = i;
+  }
+  navItems.forEach((el, idx) => {
+    el.classList.toggle('active', idx + 1 === active);
+  });
+}
+mainEl.addEventListener('scroll', updateActive, {passive:true});
+updateActive();
+
+function scrollTo(n){
+  const block = document.getElementById('block-'+n);
+  if (block) mainEl.scrollTo({top: block.offsetTop - 64, behavior:'smooth'});
+}
+</script>
+</body>
+</html>

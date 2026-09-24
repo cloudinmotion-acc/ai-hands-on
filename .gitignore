@@ -6,3 +6,5 @@ p1-invoice-extractor/DEMO_NOTES.md
 p2-rag-assistant/frontend/AGENTS.md
 p2-rag-assistant/frontend/CLAUDE.md
 p2-rag-assistant/SPEAKER_NOTES.md
+**/.next/*
+**/node_modules/*

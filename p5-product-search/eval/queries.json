@@ -1,0 +1,107 @@
+[
+  {
+    "id": 1,
+    "query": "white cotton dress for girls",
+    "expected_ids": [1, 2, 9],
+    "mode": "vector+bm25+sql",
+    "note": "colour + fabric + gender — IDs 1,2,9 are the white girls dresses"
+  },
+  {
+    "id": 2,
+    "query": "lion print t-shirt for kids",
+    "expected_ids": [13],
+    "mode": "vector+bm25+sql",
+    "note": "only one lion print product in catalogue — BM25 should rank it #1"
+  },
+  {
+    "id": 3,
+    "query": "denim jacket for teenage boys",
+    "expected_ids": [55],
+    "mode": "vector+bm25+sql",
+    "note": "no denim jacket for boys exists — ID 55 (Navy Puffer Jacket for Boys) is the closest jacket"
+  },
+  {
+    "id": 4,
+    "query": "comfortable yoga pants for women in stock",
+    "expected_ids": [42, 65, 62],
+    "mode": "vector+bm25+sql",
+    "note": "no yoga pants in catalogue — IDs 42,65,62 are women's pants with elasticated waist/comfort focus"
+  },
+  {
+    "id": 5,
+    "query": "silk blouse for women under 800 rupees",
+    "expected_ids": [41],
+    "mode": "vector+bm25+sql",
+    "note": "no silk blouse for women — ID 41 (White Broderie Anglaise Blouse, ₹680) is only women's blouse under 800"
+  },
+  {
+    "id": 6,
+    "query": "warm winter jacket for boys",
+    "expected_ids": [55],
+    "mode": "vector_only",
+    "note": "ID 55 (Navy Puffer Jacket) description literally says 'Warm navy puffer jacket' for boys — perfect match"
+  },
+  {
+    "id": 7,
+    "query": "blue denim jeans for men",
+    "expected_ids": [47],
+    "mode": "vector+bm25+sql",
+    "note": "ID 47 (Blue Slim-Fit Jeans) is the only blue denim jeans for men in catalogue"
+  },
+  {
+    "id": 8,
+    "query": "affordable kids clothing under 300",
+    "expected_ids": [13, 14, 16],
+    "mode": "sql_only",
+    "note": "IDs 13 (₹290), 14 (₹260), 16 (₹240) are the only kids items under ₹300"
+  },
+  {
+    "id": 9,
+    "query": "floral print summer dress",
+    "expected_ids": [5, 12, 34],
+    "mode": "vector_only",
+    "note": "IDs 5 (Yellow Floral Sundress), 12 (Floral Midi Dress), 34 (White Floral Maxi Dress) — dresses with floral print"
+  },
+  {
+    "id": 10,
+    "query": "school uniform white shirt for boys size M",
+    "expected_ids": [17, 15],
+    "mode": "vector+bm25+sql",
+    "note": "ID 17 (White Basic Cotton Tee) description mentions 'school uniforms'; ID 15 (Striped Polo Shirt) is smart school-style for boys"
+  },
+  {
+    "id": 11,
+    "query": "ethnic kurta for girls",
+    "expected_ids": [23],
+    "mode": "vector+bm25",
+    "note": "ID 23 (Yellow Anarkali Suit) is the only ethnic kurta-style product explicitly for girls"
+  },
+  {
+    "id": 12,
+    "query": "party wear for teenage girls",
+    "expected_ids": [26, 12, 22],
+    "mode": "vector_only",
+    "note": "ID 26 (White Lace Crop Top), 12 (Floral Midi Dress for Tweens), 22 (Pink Lehenga) — teen girls party items"
+  },
+  {
+    "id": 13,
+    "query": "fleece hoodie for men",
+    "expected_ids": [52, 31],
+    "mode": "vector+bm25+sql",
+    "note": "ID 52 (Navy Zip-Up Hoodie, men, fleece interior), 31 (Oversized Cozy Hoodie, unisex, fleece interior)"
+  },
+  {
+    "id": 14,
+    "query": "sports shorts for boys in stock",
+    "expected_ids": [64],
+    "mode": "vector+bm25+sql",
+    "note": "ID 64 (Blue Denim Shorts, boys, in stock) is the only shorts category product for boys"
+  },
+  {
+    "id": 15,
+    "query": "women's formal black blazer",
+    "expected_ids": [35, 60],
+    "mode": "vector+bm25+sql",
+    "note": "no blazer exists — ID 35 (Black Wrap Cocktail Dress, women, formal) and 60 (Grey Wool Overcoat, women, formal) are closest"
+  }
+]

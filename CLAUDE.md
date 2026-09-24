@@ -61,8 +61,3 @@ Run its context script before any UI edit:
 Then load `reference/craft-floor.md` before writing code. Never skip this for UI tasks —
 the skill sets the quality floor, bans, and design direction process.
 
-- Accenture color palette: primary `#A100FF`, pass `#00C851`, fail `#FF3B30`, bg `#080808`
-- Presentation uses glassmorphism dark theme (`presentation.html`)
-- Speaker notes are in a **separate** file (`speaker-notes.html`) — never embed them in the presentation
-
-

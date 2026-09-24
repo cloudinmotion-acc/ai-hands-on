@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P5 — Hybrid Product Search | Bharath Aaleti</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:#05050f; --card:rgba(255,255,255,.04); --cb:rgba(255,255,255,.08);
+  --blue:#3b82f6; --purp:#8b5cf6; --grn:#10b981; --amr:#f59e0b; --red:#ef4444;
+  --teal:#14b8a6; --rose:#f43f5e;
+  --txt:#f0f0f8; --mut:#8888a8; --cdbg:rgba(0,0,0,.45);
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Segoe UI',-apple-system,sans-serif;background:var(--bg);color:var(--txt);}
+
+#prog{position:fixed;top:0;left:0;height:2px;z-index:999;
+  background:linear-gradient(90deg,var(--teal),var(--purp));transition:width .4s ease;}
+#ctr{position:fixed;bottom:18px;right:22px;z-index:999;
+  font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums;}
+#dots{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
+  display:flex;gap:5px;z-index:999;}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.18);
+  transition:background .3s,transform .3s;cursor:pointer;}
+.dot.on{background:var(--teal);transform:scale(1.5);}
+
+#deck{position:relative;width:100vw;height:100vh;}
+.slide{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  padding:38px 60px 50px;
+  opacity:0;transform:translateX(56px);
+  transition:opacity .46s ease,transform .46s ease;
+  pointer-events:none;overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;
+}
+.slide::-webkit-scrollbar{width:4px;}
+.slide::-webkit-scrollbar-track{background:transparent;}
+.slide::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px;}
+.slide.on{opacity:1;transform:translateX(0);pointer-events:all;}
+.slide.out{opacity:0;transform:translateX(-56px);}
+.slide::before{content:'';position:absolute;top:-30%;left:-15%;width:55%;height:80%;
+  background:radial-gradient(ellipse,rgba(20,184,166,.05) 0%,transparent 70%);pointer-events:none;}
+.slide::after{content:'';position:absolute;bottom:-20%;right:-10%;width:50%;height:60%;
+  background:radial-gradient(ellipse,rgba(139,92,246,.05) 0%,transparent 70%);pointer-events:none;}
+
+.eyebrow{font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--mut);margin-bottom:10px;}
+h1{font-size:50px;font-weight:800;line-height:1.1;
+  background:linear-gradient(135deg,#fff 0%,#7dd3d0 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+h2{font-size:36px;font-weight:700;line-height:1.2;margin-bottom:6px;
+  background:linear-gradient(135deg,#fff 0%,#99e6e3 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+h3{font-size:15px;font-weight:600;color:var(--txt);margin-bottom:6px;}
+.sub{font-size:16px;color:var(--mut);margin-top:10px;line-height:1.5;}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.card{background:var(--card);border:1px solid var(--cb);border-radius:10px;padding:18px 20px;}
+
+.b{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;
+  font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.b-tl{background:rgba(20,184,166,.14);color:#5eead4;border:1px solid rgba(20,184,166,.3);}
+.b-pu{background:rgba(139,92,246,.14);color:#a78bfa;border:1px solid rgba(139,92,246,.3);}
+.b-gn{background:rgba(16,185,129,.14);color:#34d399;border:1px solid rgba(16,185,129,.3);}
+.b-am{background:rgba(245,158,11,.14);color:#fbbf24;border:1px solid rgba(245,158,11,.3);}
+.b-rd{background:rgba(239,68,68,.14);color:#f87171;border:1px solid rgba(239,68,68,.3);}
+.b-bl{background:rgba(59,130,246,.14);color:#60a5fa;border:1px solid rgba(59,130,246,.3);}
+
+ul.li{list-style:none;}
+ul.li li{display:flex;gap:9px;align-items:flex-start;margin-bottom:9px;font-size:14px;line-height:1.5;}
+ul.li li::before{content:'→';color:var(--teal);flex-shrink:0;margin-top:1px;}
+ul.li.ck li::before{content:'✓';color:var(--grn);}
+ul.li.wn li::before{content:'!';color:var(--amr);}
+
+pre.code{font-family:'Consolas','SF Mono',monospace;font-size:12px;
+  background:var(--cdbg);border:1px solid rgba(255,255,255,.06);
+  border-radius:8px;padding:14px 16px;line-height:1.65;color:#c9d1d9;
+  overflow-x:auto;white-space:pre;}
+code{font-family:'Consolas','SF Mono',monospace;font-size:.88em;
+  background:rgba(0,0,0,.32);padding:1px 5px;border-radius:4px;color:#5eead4;}
+.kw{color:#ff79c6;}.st{color:#f1fa8c;}.cm{color:#6272a4;}.fn{color:#50fa7b;}
+.vr{color:#8be9fd;}.nm{color:#bd93f9;}.op{color:#ff6e6e;}
+
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:0;}
+.fbox{background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.25);
+  border-radius:7px;padding:9px 13px;font-size:12px;font-weight:500;
+  text-align:center;white-space:nowrap;flex-shrink:0;line-height:1.4;}
+.fbox.pu{background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.25);}
+.fbox.gn{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.25);}
+.fbox.am{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.25);}
+.fbox.rd{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.25);}
+.farr{color:var(--mut);font-size:18px;margin:0 5px;flex-shrink:0;}
+
+table.t{width:100%;border-collapse:collapse;font-size:13px;}
+table.t th{text-align:left;padding:8px 14px;color:var(--mut);
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  border-bottom:1px solid var(--cb);}
+table.t td{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.03);}
+table.t tr:last-child td{border-bottom:none;}
+
+.mbar{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.mlbl{font-size:12px;color:var(--mut);width:120px;flex-shrink:0;}
+.bbg{flex:1;height:7px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden;}
+.bfil{height:100%;border-radius:4px;}
+.bfil.tl{background:linear-gradient(90deg,var(--teal),var(--purp));}
+.bfil.am{background:linear-gradient(90deg,var(--amr),var(--rose));}
+.mval{font-size:12px;font-weight:700;width:40px;text-align:right;}
+.mwin{font-size:10px;color:var(--teal);margin-left:4px;}
+
+.stats{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;}
+.stat .n{font-size:38px;font-weight:800;line-height:1;
+  background:linear-gradient(135deg,#fff,#7dd3d0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat .l{font-size:11px;color:var(--mut);margin-top:3px;line-height:1.3;max-width:120px;}
+
+.quote{border-left:3px solid var(--teal);padding:12px 18px;
+  background:rgba(20,184,166,.05);border-radius:0 7px 7px 0;
+  font-size:14px;font-style:italic;color:#b0d8d6;line-height:1.65;}
+
+hr.div{border:none;border-top:1px solid var(--cb);margin:12px 0;}
+.chip{display:inline-block;padding:4px 13px;
+  background:linear-gradient(135deg,rgba(20,184,166,.18),rgba(139,92,246,.18));
+  border:1px solid rgba(139,92,246,.3);border-radius:20px;
+  font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#5eead4;margin-bottom:22px;}
+
+.tl{color:#5eead4;}.gn{color:#34d399;}.rd{color:#f87171;}.am{color:#fbbf24;}
+.mu{color:var(--mut);}.fw7{font-weight:700;}
+.sp{margin-top:16px;}.sp-sm{margin-top:8px;}.sp-lg{margin-top:24px;}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.hint{position:absolute;bottom:52px;left:72px;font-size:12px;color:var(--mut);}
+kbd{background:rgba(255,255,255,.1);padding:2px 8px;border-radius:4px;font-size:11px;}
+
+/* mismatch badge demo */
+.attr-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;
+  border-radius:5px;font-size:11px;font-weight:500;margin:2px;}
+.attr-ok{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:var(--mut);}
+.attr-miss{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#fbbf24;}
+.warn-icon{font-size:10px;}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+<div id="ctr"></div>
+<div id="dots"></div>
+<div id="deck">
+
+<!-- ═══ SLIDE 1 — TITLE ══════════════════════════════════════════════ -->
+<div class="slide" id="s1">
+  <div style="margin-top:72px;max-width:840px;">
+    <div class="chip">P5 — AI Engineering Portfolio</div>
+    <h1>Hybrid Product Search</h1>
+    <p class="sub" style="font-size:18px;margin-top:18px;">
+      Three-leg retrieval · SQL + BM25 + pgvector · RRF fusion<br>
+      <span style="font-size:14px;color:var(--mut);margin-top:6px;display:block;">
+        MCP tool · LangGraph agent · SSE streaming · Precision@5 eval
+      </span>
+    </p>
+    <div class="sp-lg"></div>
+    <div class="row">
+      <span class="b b-tl">SQL Filter</span>
+      <span class="b b-bl">BM25 Keyword</span>
+      <span class="b b-pu">pgvector Semantic</span>
+      <span class="b b-am">RRF Merge</span>
+      <span class="b b-gn">MCP · LangGraph</span>
+    </div>
+    <div class="sp-lg"></div>
+    <p style="font-size:12px;color:var(--mut);">Bharath Aaleti &nbsp;·&nbsp; Accenture FDE &nbsp;·&nbsp; AI Engineering Hands-On</p>
+  </div>
+  <p class="hint">Press <kbd>→</kbd> or click right to advance &nbsp;·&nbsp; <kbd>←</kbd> to go back</p>
+</div>
+
+<!-- ═══ SLIDE 2 — WHY HYBRID ════════════════════════════════════════ -->
+<div class="slide" id="s2">
+  <div class="eyebrow">Motivation</div>
+  <h2>Why Hybrid? No Single Retriever Wins Everything</h2>
+  <div class="sp"></div>
+  <div class="g3" style="margin-bottom:18px;">
+    <div class="card" style="border-color:rgba(239,68,68,.25);">
+      <div class="row" style="margin-bottom:10px;"><span class="b b-rd">SQL only</span></div>
+      <ul class="li" style="font-size:13px;">
+        <li>Handles structured attributes perfectly — gender, price, stock</li>
+        <li><strong class="rd">Fails</strong> on natural language: "cozy winter jacket" returns 0 rows — column says "puffer", not "cozy"</li>
+        <li>No ranking — returns all matches equally</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color:rgba(59,130,246,.25);">
+      <div class="row" style="margin-bottom:10px;"><span class="b b-bl">BM25 only</span></div>
+      <ul class="li" style="font-size:13px;">
+        <li>Fast keyword matching — "kurta" finds every kurta in the catalogue</li>
+        <li><strong class="rd">Fails</strong> on synonyms — "ethnic suit" misses "anarkali" if neither word appears in query</li>
+        <li>Ignores structured filters — surfaces men's kurtas when you asked for girls</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color:rgba(139,92,246,.25);">
+      <div class="row" style="margin-bottom:10px;"><span class="b b-pu">Vector only</span></div>
+      <ul class="li" style="font-size:13px;">
+        <li>Understands meaning — "yoga pants" matches "wide-leg palazzo" semantically</li>
+        <li><strong class="rd">Fails</strong> on exact keyword queries — "lion print t-shirt" needs BM25 precision</li>
+        <li>No structural awareness — "under ₹500 in stock" needs SQL</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card" style="background:rgba(20,184,166,.05);border-color:rgba(20,184,166,.2);">
+    <p style="font-size:13px;color:var(--mut);">
+      <span class="tl fw7">Solution:</span> Run all three in parallel, then merge using RRF.
+      Each retriever contributes what it does best. No score calibration needed.
+      See <code>mcp_server.py:79</code> — <code>pool_k = top_k * 4 if filters else top_k * 2</code>.
+    </p>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 3 — ARCHITECTURE ══════════════════════════════════════ -->
+<div class="slide" id="s3">
+  <div class="eyebrow">Architecture</div>
+  <h2>7-Step Pipeline</h2>
+  <p class="sub" style="font-size:13px;margin-bottom:18px;">Every user query passes through all 7 steps. Steps 2–4 run in parallel.</p>
+  <div class="flow" style="justify-content:center;margin-bottom:24px;flex-wrap:wrap;gap:3px;">
+    <div class="fbox"><strong>User Query</strong></div><span class="farr">→</span>
+    <div class="fbox am"><strong>Decomposer</strong><br><span style="font-size:10px;color:var(--mut);">decomposer.py</span></div><span class="farr">→</span>
+    <div class="fbox rd"><strong>SQL Filter</strong><br><span style="font-size:10px;color:var(--mut);">sql_filter.py</span></div>
+    <div class="fbox"><strong>+</strong></div>
+    <div class="fbox"><strong>BM25</strong><br><span style="font-size:10px;color:var(--mut);">bm25_retriever.py</span></div>
+    <div class="fbox"><strong>+</strong></div>
+    <div class="fbox pu"><strong>pgvector</strong><br><span style="font-size:10px;color:var(--mut);">vector_retriever.py</span></div><span class="farr">→</span>
+    <div class="fbox am"><strong>RRF Merge</strong><br><span style="font-size:10px;color:var(--mut);">merger.py</span></div><span class="farr">→</span>
+    <div class="fbox gn"><strong>Hard Filter</strong><br><span style="font-size:10px;color:var(--mut);">mcp_server.py</span></div><span class="farr">→</span>
+    <div class="fbox gn"><strong>Agent</strong><br><span style="font-size:10px;color:var(--mut);">agent.py</span></div>
+  </div>
+  <div class="g3">
+    <div class="card">
+      <h3>Step 1 — Decomposer</h3>
+      <p style="font-size:12px;color:var(--mut);line-height:1.6;">LLM reads raw query → splits into <code>semantic_query</code> (for BM25+vector) and structured <code>filters</code> (for SQL).</p>
+<pre class="code" style="font-size:10px;margin-top:8px;"><span class="cm"># decomposer.py:decompose()</span>
+<span class="st">"white cotton dress for girls under 500"</span>
+→ {
+  <span class="vr">semantic_query</span>: <span class="st">"white cotton dress"</span>,
+  <span class="vr">filters</span>: { <span class="vr">colour</span>:<span class="st">"white"</span>, <span class="vr">fabric</span>:<span class="st">"cotton"</span>,
+             <span class="vr">gender</span>:<span class="st">"girls"</span>, <span class="vr">max_price</span>:<span class="nm">500</span> }
+}</pre>
+    </div>
+    <div class="card">
+      <h3>Steps 2–4 — Three Retrievers</h3>
+      <ul class="li" style="font-size:12px;margin-top:6px;">
+        <li><strong>SQL</strong> — exact WHERE clause from filter dict, ORDER BY price ASC</li>
+        <li><strong>BM25</strong> — tokenized keyword search on name+description corpus loaded at startup</li>
+        <li><strong>Vector</strong> — cosine similarity via <code>embedding &lt;=&gt; query_vec</code>, NVIDIA 2048-dim embeddings</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Steps 5–7 — Merge, Filter, Answer</h3>
+      <ul class="li" style="font-size:12px;margin-top:6px;">
+        <li><strong>RRF</strong> — <code>Σ 1/(60 + rank)</code> per retriever list, no score calibration</li>
+        <li><strong>Hard filter</strong> — post-RRF: enforce gender + in_stock as hard gates</li>
+        <li><strong>Agent</strong> — LangGraph ReAct over FastMCP tool, SSE-streams result to UI</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 4 — DECOMPOSER ════════════════════════════════════════ -->
+<div class="slide" id="s4">
+  <div class="eyebrow">Step 1</div>
+  <h2>LLM Query Decomposer</h2>
+  <div class="sp"></div>
+  <div class="g2">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="margin-bottom:10px;">Why decompose at all?</h3>
+        <p style="font-size:13px;color:var(--mut);line-height:1.6;">A user query like <em>"white cotton dress for girls under ₹500 in stock"</em> contains <strong>two kinds of intent</strong>: semantic description (for vector/BM25) and structured constraints (for SQL). Mixing them into a single BM25 query degrades both. Separating them lets each retriever do exactly what it's built for.</p>
+      </div>
+      <div class="card" style="background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.2);">
+        <h3 style="margin-bottom:8px;">Design decisions</h3>
+        <ul class="li" style="font-size:12px;">
+          <li><strong>Temperature=0</strong> — decomposer must be deterministic, not creative</li>
+          <li><strong>No <code>category</code> key</strong> — DB <code>category</code> column stores item types ("pants", "dress"), not demographic groups. Removed from schema after eval showed it caused <code>WHERE category='women'</code> → 0 rows</li>
+          <li><strong>Age range rules</strong> — "for kids" → <code>max_age=12</code>; "for teens" → <code>min_age=13, max_age=17</code></li>
+          <li><strong>Fallback</strong> — any JSON parse error → <code>{semantic_query: rawQuery, filters: {}}</code></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:10px;">decomposer.py system prompt (key rules)</h3>
+<pre class="code" style="font-size:11px;"><span class="cm"># Only valid filter keys:</span>
+<span class="st">gender</span>    : <span class="st">"boys"</span> | <span class="st">"girls"</span> | <span class="st">"women"</span> | <span class="st">"men"</span> | <span class="st">"unisex"</span>
+<span class="st">colour</span>    : lowercase colour name
+<span class="st">fabric</span>    : lowercase fabric name
+<span class="st">min_age</span>   : integer (years)
+<span class="st">max_age</span>   : integer (years)
+<span class="st">max_price</span> : integer (INR)
+<span class="st">in_stock</span>  : true
+
+<span class="cm"># Rules</span>
+<span class="st">"for girls"</span>    → gender = <span class="st">"girls"</span>
+<span class="st">"for toddlers"</span> → max_age = <span class="nm">12</span>   <span class="cm"># not gender</span>
+<span class="st">"for teens"</span>    → min_age=<span class="nm">13</span>, max_age=<span class="nm">17</span>
+<span class="st">"in stock"</span>     → in_stock = <span class="kw">true</span>
+<span class="st">"under 500"</span>    → max_price = <span class="nm">500</span>
+
+<span class="cm"># NEVER include "category" — not a valid filter</span>
+<span class="cm"># Output: ONLY valid JSON, no markdown</span></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 5 — THREE RETRIEVERS ══════════════════════════════════ -->
+<div class="slide" id="s5">
+  <div class="eyebrow">Steps 2–4</div>
+  <h2>Three Retrievers — Each One Specialised</h2>
+  <div class="sp"></div>
+  <div class="g3">
+    <div class="card">
+      <div class="row" style="margin-bottom:10px;"><span class="b b-rd">SQL Filter</span><code style="font-size:10px;">sql_filter.py</code></div>
+      <ul class="li" style="font-size:12px;">
+        <li>Builds parametric WHERE clause from any filter combination</li>
+        <li>All conditions <code>AND</code>-ed — only exact matches qualify</li>
+        <li><code>psycopg2.extras.RealDictCursor</code> → list of dict rows</li>
+        <li>ORDER BY price ASC — cheapest first for SQL leg</li>
+      </ul>
+<pre class="code" style="font-size:10px;margin-top:10px;"><span class="cm"># sql_filter.py:43-73</span>
+<span class="kw">if</span> gen := filters.get(<span class="st">"gender"</span>):
+  conditions.append(
+    <span class="st">"LOWER(gender) = LOWER(%s)"</span>)
+  params.append(gen)
+<span class="kw">if</span> (mx := filters.get(<span class="st">"max_price"</span>)):
+  conditions.append(<span class="st">"price <= %s"</span>)
+  params.append(<span class="fn">int</span>(mx))</pre>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:10px;"><span class="b b-bl">BM25 Keyword</span><code style="font-size:10px;">bm25_retriever.py</code></div>
+      <ul class="li" style="font-size:12px;">
+        <li><code>BM25Okapi</code> index built at module import on all 65 products</li>
+        <li>Corpus = name + description, tokenised with <code>re.findall([a-z0-9]+)</code></li>
+        <li>Stays in memory — zero latency after startup</li>
+        <li>Zero-score results excluded — only real keyword matches surface</li>
+      </ul>
+<pre class="code" style="font-size:10px;margin-top:10px;"><span class="cm"># bm25_retriever.py: tokenize + search</span>
+<span class="kw">def</span> <span class="fn">_tokenize</span>(text):
+  <span class="kw">return</span> re.findall(<span class="st">r"[a-z0-9]+"</span>,
+                     text.lower())
+
+scores = _bm25.get_scores(tokens)
+<span class="cm"># zip with product list, exclude 0s</span></pre>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:10px;"><span class="b b-pu">pgvector</span><code style="font-size:10px;">vector_retriever.py</code></div>
+      <ul class="li" style="font-size:12px;">
+        <li>Query embedded with <code>input_type="query"</code> vs <code>"passage"</code> at ingest — different prompt prefixes</li>
+        <li>2048-dim vectors (<code>nvidia/nv-embedqa-e5-v5</code>)</li>
+        <li>Cosine similarity via PostgreSQL <code>&lt;=&gt;</code> operator</li>
+        <li><code>similarity = 1 - (embedding &lt;=&gt; vec)</code></li>
+      </ul>
+<pre class="code" style="font-size:10px;margin-top:10px;"><span class="cm"># vector_retriever.py: cosine search</span>
+<span class="kw">SELECT</span> *, <span class="nm">1</span> - (embedding <span class="op">&lt;=&gt;</span> %s::vector)
+  AS similarity
+<span class="kw">FROM</span> products
+<span class="kw">ORDER BY</span> embedding <span class="op">&lt;=&gt;</span> %s::vector
+<span class="kw">LIMIT</span> %s</pre>
+    </div>
+  </div>
+  <div class="sp-sm"></div>
+  <div class="card" style="background:rgba(139,92,246,.05);border-color:rgba(139,92,246,.15);">
+    <p style="font-size:13px;color:var(--mut);">
+      <span style="color:#a78bfa;font-weight:700;">Key constraint:</span> SQL retriever gets the structured <code>filters</code> dict. BM25 and vector get the <code>semantic_query</code> string. Different inputs for different strengths — this is the whole point of the decomposer.
+    </p>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 6 — RRF MERGE ══════════════════════════════════════════ -->
+<div class="slide" id="s6">
+  <div class="eyebrow">Step 5</div>
+  <h2>RRF Merge — Rank Without Score Calibration</h2>
+  <div class="sp"></div>
+  <div class="g2">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="margin-bottom:10px;">The problem with raw score merging</h3>
+        <p style="font-size:13px;color:var(--mut);line-height:1.6;">
+          BM25 returns scores like <code>7.23</code>. pgvector returns cosine similarity like <code>0.87</code>. SQL has no score at all. You can't add these — they live in completely different scales. Calibrating them requires expensive experiments that need repeating whenever you change any retriever.
+        </p>
+      </div>
+      <div class="card" style="background:rgba(20,184,166,.05);border-color:rgba(20,184,166,.2);">
+        <h3 style="margin-bottom:10px;">RRF: use rank, not score</h3>
+        <p style="font-size:13px;color:var(--mut);line-height:1.6;">
+          Every item that appears in any retriever list gets a contribution of <code>1 / (60 + rank)</code>. The 60 is the smoothing constant from the original RRF paper — it dampens the advantage of rank 1 vs rank 5. An item appearing in all three lists scores much higher than an item appearing in just one.
+        </p>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:10px;">merger.py — the full implementation</h3>
+<pre class="code" style="font-size:11px;"><span class="cm"># merger.py — RRF formula</span>
+_K = <span class="nm">60</span>  <span class="cm"># RRF smoothing constant</span>
+
+<span class="kw">for</span> ranked <span class="kw">in</span> ranked_lists:
+  <span class="kw">for</span> rank, product <span class="kw">in</span> <span class="fn">enumerate</span>(ranked, start=<span class="nm">1</span>):
+    pid = product[<span class="st">"id"</span>]
+    rrf_scores[pid] = (
+      rrf_scores.get(pid, <span class="nm">0.0</span>)
+      + <span class="nm">1.0</span> / (_K + rank)   <span class="cm"># ← line 38</span>
+    )
+
+<span class="cm"># Sort descending by combined RRF score</span>
+sorted_ids = <span class="fn">sorted</span>(rrf_scores,
+  key=<span class="kw">lambda</span> pid: rrf_scores[pid],
+  reverse=<span class="kw">True</span>
+)</pre>
+      <hr class="div" style="margin:12px 0;">
+      <p style="font-size:12px;color:var(--mut);line-height:1.6;">
+        Example: product at SQL rank 3 + BM25 rank 1 + vector rank 5 gets:<br>
+        <code>1/63 + 1/61 + 1/65 = 0.0477</code> — higher than a product that only appears in one list at rank 1 (<code>1/61 = 0.0164</code>).
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 7 — HARD FILTER ════════════════════════════════════════ -->
+<div class="slide" id="s7">
+  <div class="eyebrow">Step 6 — Design Decision</div>
+  <h2>Post-RRF Hard Filter: Fixing BM25's Demographic Blindness</h2>
+  <div class="sp"></div>
+  <div class="g2">
+    <div>
+      <div class="card" style="background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.2);margin-bottom:14px;">
+        <h3 class="rd" style="margin-bottom:8px;">The failure mode</h3>
+        <p style="font-size:13px;color:var(--mut);line-height:1.6;">
+          Query: <em>"ethnic kurta for girls"</em>.<br><br>
+          BM25 finds every product with "kurta" in its name — which are all <strong>men's and women's</strong> kurtas. They rank #1–#4 in the BM25 leg. The correct item (Yellow Anarkali Suit, gender=girls, ID 23) has no "kurta" in its description — BM25 misses it entirely. After RRF merge, the men's/women's kurtas dominate because they appear in BM25 <em>and</em> vector. Hybrid P@5 = 0.00.
+        </p>
+      </div>
+      <div class="card" style="background:rgba(16,185,129,.05);border-color:rgba(16,185,129,.2);">
+        <h3 class="gn" style="margin-bottom:8px;">The fix: post-RRF gate</h3>
+        <p style="font-size:13px;color:var(--mut);line-height:1.6;">
+          After RRF merge over an expanded 4× pool, apply hard demographic filters. If <code>gender=girls</code> is in the decomposed filters, drop every non-girls item from the merged results. With non-girls kurtas gone, ID 23 surfaces. Hybrid P@5 = 0.20.
+        </p>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:10px;">mcp_server.py — _hard_filter()</h3>
+<pre class="code" style="font-size:11px;"><span class="cm"># mcp_server.py:33-50</span>
+<span class="kw">def</span> <span class="fn">_hard_filter</span>(products, filters):
+  <span class="st">"""Gender + in_stock as hard gates.
+  Unisex satisfies any gender request."""</span>
+  out = []
+  gender_want = <span class="fn">str</span>(filters.get(<span class="st">"gender"</span>,<span class="st">""</span>)).lower()
+  stock_needed = filters.get(<span class="st">"in_stock"</span>) <span class="kw">is True</span>
+
+  <span class="kw">for</span> p <span class="kw">in</span> products:
+    <span class="kw">if</span> gender_want:
+      pg = p.get(<span class="st">"gender"</span>,<span class="st">""</span>).lower()
+      <span class="kw">if</span> pg != gender_want <span class="kw">and</span> pg != <span class="st">"unisex"</span>:
+        <span class="kw">continue</span>   <span class="cm"># drop wrong gender</span>
+    <span class="kw">if</span> stock_needed <span class="kw">and not</span> p.get(<span class="st">"in_stock"</span>):
+      <span class="kw">continue</span>
+    out.append(p)
+  <span class="kw">return</span> out</pre>
+      <hr class="div">
+      <p style="font-size:12px;color:var(--mut);line-height:1.6;">
+        <strong>Why only gender + in_stock?</strong> These are demographic/availability constraints — if you say "for girls", a women's item is genuinely wrong. Colour and fabric are preferences — showing a georgette dress when you asked for cotton is a near-match, which is useful. Those stay soft.
+      </p>
+      <p style="font-size:12px;color:var(--mut);margin-top:8px;">
+        <strong>Unisex pass-through:</strong> A unisex hoodie satisfies "fleece hoodie for men". Without this, ID 31 (Oversized Cozy Hoodie, unisex) was incorrectly dropped, hurting Q13 P@5.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 8 — MCP + AGENT ════════════════════════════════════════ -->
+<div class="slide" id="s8">
+  <div class="eyebrow">Steps 7–8</div>
+  <h2>MCP Tool + LangGraph ReAct Agent</h2>
+  <div class="sp"></div>
+  <div class="g2">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="row" style="margin-bottom:8px;"><span class="b b-tl">FastMCP</span><h3 style="margin:0;">Entire pipeline as one tool</h3></div>
+        <ul class="li" style="font-size:13px;">
+          <li>The 7-step pipeline is wrapped as a single <code>@mcp.tool()</code> — the agent calls <code>search_products(query, top_k)</code> and gets back JSON with decomposed filters + results</li>
+          <li>Agent doesn't need to know about SQL, BM25, vector, or RRF — that complexity is behind the tool boundary</li>
+          <li>In-process bridge: agent imports <code>search_products</code> directly — no subprocess, no network hop</li>
+        </ul>
+<pre class="code" style="font-size:10px;margin-top:10px;"><span class="cm"># mcp_server.py:53-112</span>
+<span class="am">@mcp.tool()</span>
+<span class="kw">def</span> <span class="fn">search_products</span>(query: str,
+                    top_k: int = <span class="nm">10</span>) → str:
+  decomposed = decomposer.<span class="fn">decompose</span>(query)
+  pool_k = top_k * <span class="nm">4</span> <span class="kw">if</span> filters <span class="kw">else</span> top_k * <span class="nm">2</span>
+  sql = sql_filter.<span class="fn">search</span>(filters, pool_k)
+  bm25 = bm25_retriever.<span class="fn">search</span>(sem_q, pool_k)
+  vec = vector_retriever.<span class="fn">search</span>(sem_q, pool_k)
+  merged = merger.<span class="fn">merge</span>(sql, bm25, vec, pool_k)
+  <span class="kw">return</span> json.<span class="fn">dumps</span>({<span class="st">"decomposed"</span>:...,<span class="st">"results"</span>:...})</pre>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:8px;"><span class="b b-gn">LangGraph</span><h3 style="margin:0;">ReAct agent with backoff</h3></div>
+      <ul class="li" style="font-size:13px;">
+        <li>LangGraph ReAct loop: <code>agent_node → tool_node → should_continue → …</code></li>
+        <li>System prompt: <strong>"Call search_products EXACTLY ONCE per request"</strong> — prevents the agent from being over-agentic and calling 3× (was observed before the instruction was added)</li>
+        <li>4-attempt exponential backoff: 5s → 10s → 20s for NVIDIA 429 overload errors</li>
+        <li>SSE events streamed to frontend: <code>tool_call</code> → <code>tool_result</code> → <code>final_answer</code> → <code>done</code></li>
+      </ul>
+<pre class="code" style="font-size:10px;margin-top:10px;"><span class="cm"># agent.py: LangGraph state machine</span>
+workflow.<span class="fn">add_node</span>(<span class="st">"agent"</span>, agent_node)
+workflow.<span class="fn">add_node</span>(<span class="st">"tools"</span>, tool_node)
+workflow.<span class="fn">add_conditional_edges</span>(
+  <span class="st">"agent"</span>,
+  should_continue,  <span class="cm"># checks last msg for tool_calls</span>
+  {<span class="st">"tools"</span>: <span class="st">"tools"</span>, <span class="st">"end"</span>: END}
+)</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 9 — UI + SSE ═══════════════════════════════════════════ -->
+<div class="slide" id="s9">
+  <div class="eyebrow">Frontend</div>
+  <h2>SSE Streaming + Mismatch UX</h2>
+  <div class="sp"></div>
+  <div class="g2">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="margin-bottom:8px;">FastAPI SSE — main.py</h3>
+        <p style="font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:10px;">
+          <code>POST /search</code> returns a <code>StreamingResponse</code>. The agent yields 4 event types as it runs — the UI renders each one progressively without waiting for the full answer.
+        </p>
+<pre class="code" style="font-size:10px;"><span class="cm"># main.py — SSE event types</span>
+data: {<span class="vr">"type"</span>:<span class="st">"tool_call"</span>, <span class="vr">"tool"</span>:<span class="st">"search_products"</span>, ...}
+data: {<span class="vr">"type"</span>:<span class="st">"tool_result"</span>, <span class="vr">"decomposed"</span>:{...},
+        <span class="vr">"result_count"</span>:<span class="nm">10</span>, <span class="vr">"top_results"</span>:[...]}
+data: {<span class="vr">"type"</span>:<span class="st">"final_answer"</span>, <span class="vr">"content"</span>:<span class="st">"..."</span>}
+data: {<span class="vr">"type"</span>:<span class="st">"done"</span>}</pre>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:8px;">Spinner fix — page.tsx</h3>
+        <p style="font-size:12px;color:var(--mut);line-height:1.5;margin-bottom:8px;">
+          A <code>tool_call</code> event shows a spinner. It only stops when a <code>tool_result</code> for the same tool appears <em>later</em> in the trace array. Computed on each render — no extra state:
+        </p>
+<pre class="code" style="font-size:10px;"><span class="cm"># page.tsx — callDone logic</span>
+<span class="kw">const</span> callDone = ev.type === <span class="st">"tool_call"</span>
+  ? trace.<span class="fn">slice</span>(i+<span class="nm">1</span>).<span class="fn">some</span>(
+      e => e.type === <span class="st">"tool_result"</span>
+        && e.tool === ev.tool)
+  : <span class="kw">false</span>;</pre>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:10px;">Mismatch highlighting — page.tsx:53-79</h3>
+      <p style="font-size:12px;color:var(--mut);line-height:1.5;margin-bottom:12px;">
+        The frontend has both <code>decomposed.filters</code> and each product's attributes. <code>computeMismatches()</code> diffs them client-side — no backend change needed. Non-matching attribute badges turn amber with a warning icon and a hover tooltip.
+      </p>
+<pre class="code" style="font-size:10px;margin-bottom:14px;"><span class="cm"># page.tsx:53 — computeMismatches()</span>
+<span class="kw">if</span> (filters.fabric && <span class="fn">s</span>(product.fabric) !== <span class="fn">s</span>(filters.fabric))
+  mismatches.<span class="fn">add</span>(<span class="st">"fabric"</span>);  <span class="cm">// amber badge</span>
+
+<span class="kw">if</span> (filters.gender) {
+  <span class="kw">const</span> pg = <span class="fn">s</span>(product.gender);
+  <span class="kw">if</span> (pg !== <span class="fn">s</span>(filters.gender) && pg !== <span class="st">"unisex"</span>)
+    mismatches.<span class="fn">add</span>(<span class="st">"gender"</span>);
+}
+<span class="kw">if</span> (filters.max_price > product.price)
+  mismatches.<span class="fn">add</span>(<span class="st">"price"</span>);   <span class="cm">// amber price number</span></pre>
+      <!-- live badge demo -->
+      <p style="font-size:11px;color:var(--mut);margin-bottom:6px;">Example — query "silk blouse for women under ₹800":</p>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
+        <span class="attr-badge attr-ok">white</span>
+        <span class="attr-badge attr-miss"><span class="warn-icon">⚠</span> cotton <span style="font-size:9px;">(searched: silk)</span></span>
+        <span class="attr-badge attr-ok">Size M</span>
+        <span class="attr-badge attr-ok">Women</span>
+        <span style="font-size:11px;color:#34d399;font-weight:700;margin-left:4px;">₹680</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 10 — EVAL RESULTS ══════════════════════════════════════ -->
+<div class="slide" id="s10">
+  <div class="eyebrow">Evaluation</div>
+  <h2>Precision@5 — Across 3 Retrieval Modes</h2>
+  <div class="sp"></div>
+  <div class="g2">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="margin-bottom:10px;">15 queries · 3 modes · automated eval</h3>
+        <p style="font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:12px;">
+          <code>eval/run_eval.py</code> runs each query through BM25-only, vector-only, and full hybrid. <code>precision_at_k(results, expected_ids, k=5)</code> — fraction of top-5 results that are expected matches, denominator = <code>min(5, len(results))</code>.
+        </p>
+        <div class="mbar"><span class="mlbl">BM25 only</span><div class="bbg"><div class="bfil am" style="width:56%"></div></div><span class="mval am">0.28</span></div>
+        <div class="mbar"><span class="mlbl">Vector only</span><div class="bbg"><div class="bfil tl" style="width:64%"></div></div><span class="mval tl">0.32</span></div>
+        <div class="mbar"><span class="mlbl">Hybrid</span><div class="bbg"><div class="bfil tl" style="width:64%"></div></div><span class="mval tl">0.32 <span class="mwin">+14% vs BM25</span></span></div>
+        <hr class="div">
+        <p style="font-size:11px;color:var(--mut);line-height:1.6;">
+          Hybrid matches vector precision but adds structured filtering — in_stock, price ceiling, gender constraints — that vector-only cannot enforce. Many queries score 0.20 max because there's only 1 expected item; finding it in top-5 is perfect retrieval.
+        </p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="margin-bottom:10px;">Key findings from the eval</h3>
+        <table class="t">
+          <thead><tr><th>Query</th><th>Challenge</th><th>Hybrid</th></tr></thead>
+          <tbody>
+            <tr>
+              <td style="font-size:12px;">yoga pants women in stock</td>
+              <td style="font-size:11px;color:var(--mut);">No "yoga pants" in catalogue — must match semantically</td>
+              <td class="tl fw7" style="font-size:12px;">0.60 ✓</td>
+            </tr>
+            <tr>
+              <td style="font-size:12px;">ethnic kurta for girls</td>
+              <td style="font-size:11px;color:var(--mut);">BM25 finds men's kurtas; correct item is an "anarkali"</td>
+              <td class="tl fw7" style="font-size:12px;">0.20 ✓ <span style="font-size:10px;">(fixed: was 0.00)</span></td>
+            </tr>
+            <tr>
+              <td style="font-size:12px;">silk blouse women under ₹800</td>
+              <td style="font-size:11px;color:var(--mut);">Catalogue gap — only silk item costs ₹2100</td>
+              <td class="am fw7" style="font-size:12px;">0.20 — shows near-matches + mismatch badges</td>
+            </tr>
+            <tr>
+              <td style="font-size:12px;">fleece hoodie for men</td>
+              <td style="font-size:11px;color:var(--mut);">Expected item is unisex — hard gender filter must pass it</td>
+              <td class="tl fw7" style="font-size:12px;">0.40 ✓</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card" style="background:rgba(20,184,166,.05);border-color:rgba(20,184,166,.2);">
+        <h3 style="margin-bottom:8px;">eval/run_eval.py — precision formula</h3>
+<pre class="code" style="font-size:10px;"><span class="cm"># eval/run_eval.py:45-50</span>
+<span class="kw">def</span> <span class="fn">precision_at_k</span>(results, expected_ids, k):
+  <span class="kw">if not</span> expected_ids: <span class="kw">return</span> <span class="nm">-1.0</span>
+  top_ids = [r[<span class="st">"id"</span>] <span class="kw">for</span> r <span class="kw">in</span> results[:k]]
+  hits = <span class="fn">sum</span>(<span class="nm">1</span> <span class="kw">for</span> pid <span class="kw">in</span> top_ids
+             <span class="kw">if</span> pid <span class="kw">in</span> expected_ids)
+  <span class="kw">return</span> hits / <span class="fn">min</span>(k, <span class="fn">len</span>(top_ids))</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 11 — KEY DECISIONS ═════════════════════════════════════ -->
+<div class="slide" id="s11">
+  <div class="eyebrow">Design Decisions</div>
+  <h2>Five Decisions That Shaped the System</h2>
+  <div class="sp"></div>
+  <div class="g2" style="margin-bottom:14px;">
+    <div class="card">
+      <div class="row" style="margin-bottom:8px;"><span class="b b-tl">Decision 1</span><h3 style="margin:0;">Remove <code>category</code> from decomposer</h3></div>
+      <p style="font-size:13px;color:var(--mut);line-height:1.6;">
+        Initial decomposer extracted <code>category="women"</code> from "yoga pants for women" but the DB <code>category</code> column stores item types like "pants" and "dress", not demographic groups. <code>WHERE category='women'</code> returned 0 rows. Removing category from the schema fixed Q4 from 0.40→0.60.
+      </p>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:8px;"><span class="b b-pu">Decision 2</span><h3 style="margin:0;">Adaptive pool size vs fixed</h3></div>
+      <p style="font-size:13px;color:var(--mut);line-height:1.6;">
+        First attempt used a flat 4× pool for all queries. Open queries (no filters) got 40 items per retriever, which diluted the RRF merge and hurt Q9 (0.60→0.40). Fix: <code>pool_k = top_k * 4 if filters else top_k * 2</code> — expanded pool only when post-filtering will reduce results.
+      </p>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:8px;"><span class="b b-am">Decision 3</span><h3 style="margin:0;">Unisex items pass any gender filter</h3></div>
+      <p style="font-size:13px;color:var(--mut);line-height:1.6;">
+        First hard-filter version dropped ID 31 (Oversized Cozy Hoodie, gender=unisex) when the user searched "for men". A unisex item is a valid result for any gender request. Added: <code>if pg != gender_want and pg != "unisex": continue</code>.
+      </p>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:8px;"><span class="b b-gn">Decision 4</span><h3 style="margin:0;">In-process MCP bridge</h3></div>
+      <p style="font-size:13px;color:var(--mut);line-height:1.6;">
+        FastMCP supports HTTP and stdio transports for multi-process use. For this single-machine setup, the agent directly imports <code>search_products</code> from <code>mcp_server.py</code> — no subprocess, no port, no serialisation overhead. Same MCP tool interface, zero latency on the bridge.
+      </p>
+    </div>
+  </div>
+  <div class="card" style="background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.2);">
+    <div class="row">
+      <div>
+        <h3 style="margin-bottom:6px;">Decision 5 — Mismatch UI is a product decision, not just an engineering one</h3>
+        <p style="font-size:13px;color:var(--mut);line-height:1.6;">
+          Returning near-matches when no exact match exists is the right search behaviour — showing nothing is worse than showing the closest thing. But the UI must be honest about which attributes don't match. <code>computeMismatches()</code> in <code>page.tsx:53</code> diffs product attributes against decomposed filters entirely client-side. The backend sends all data; the frontend interprets it. No API change needed.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 12 — Q&A ════════════════════════════════════════════════ -->
+<div class="slide" id="s12">
+  <div style="margin-top:64px;max-width:780px;">
+    <div class="chip">Questions</div>
+    <h1 style="font-size:46px;">What would you<br>like to explore?</h1>
+    <div class="sp-lg"></div>
+    <div class="g2" style="gap:12px;max-width:680px;">
+      <div class="card" style="font-size:13px;color:var(--mut);padding:13px 16px;">🔍 How RRF score calibration works vs. learned rank fusion</div>
+      <div class="card" style="font-size:13px;color:var(--mut);padding:13px 16px;">🧠 Decomposer reliability — what happens when LLM extracts wrong filters</div>
+      <div class="card" style="font-size:13px;color:var(--mut);padding:13px 16px;">⚡ Latency breakdown — which step is slowest and why</div>
+      <div class="card" style="font-size:13px;color:var(--mut);padding:13px 16px;">📊 Eval methodology — Precision@5 vs Recall@5, expected_ids labelling</div>
+      <div class="card" style="font-size:13px;color:var(--mut);padding:13px 16px;">🔧 Production scaling — async BM25 rebuild, pgvector index tuning</div>
+      <div class="card" style="font-size:13px;color:var(--mut);padding:13px 16px;">🏗️ MCP in production — when subprocess transport is better than in-process</div>
+    </div>
+  </div>
+  <p class="hint" style="bottom:40px;"><kbd>←</kbd> to go back to any slide</p>
+</div>
+
+</div><!-- /#deck -->
+
+<script>
+const N = 12;
+let cur = 1;
+
+const dotsEl = document.getElementById('dots');
+for (let i = 1; i <= N; i++) {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 1 ? ' on' : '');
+  d.onclick = () => go(i);
+  dotsEl.appendChild(d);
+}
+
+function go(n) {
+  if (n < 1 || n > N || n === cur) return;
+  const prev = document.getElementById('s' + cur);
+  const next = document.getElementById('s' + n);
+  prev.classList.remove('on');
+  prev.classList.add('out');
+  setTimeout(() => prev.classList.remove('out'), 480);
+  next.classList.add('on');
+  cur = n;
+  document.getElementById('prog').style.width = (cur / N * 100) + '%';
+  document.getElementById('ctr').textContent = cur + ' / ' + N;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i + 1 === cur));
+}
+
+document.getElementById('s1').classList.add('on');
+document.getElementById('prog').style.width = (1 / N * 100) + '%';
+document.getElementById('ctr').textContent = '1 / ' + N;
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(cur + 1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(cur - 1); }
+  else if (e.key === 'Home') go(1);
+  else if (e.key === 'End') go(N);
+});
+
+let sx = 0;
+document.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive:true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - sx;
+  if (Math.abs(dx) > 48) go(cur + (dx < 0 ? 1 : -1));
+});
+
+document.getElementById('deck').addEventListener('click', e => {
+  if (e.target.closest('#dots, a, button, kbd')) return;
+  go(cur + (e.clientX > window.innerWidth / 2 ? 1 : -1));
+});
+</script>
+</body>
+</html>

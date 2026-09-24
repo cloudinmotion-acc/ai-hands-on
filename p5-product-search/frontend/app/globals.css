@@ -1,0 +1,66 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --color-background:         oklch(0.977 0.008 82);
+  --color-foreground:         oklch(0.155 0.015 65);
+  --color-card:               oklch(0.991 0.005 78);
+  --color-card-foreground:    oklch(0.155 0.015 65);
+  --color-border:             oklch(0.882 0.015 76);
+  --color-input:              oklch(0.882 0.015 76);
+  --color-muted:              oklch(0.948 0.012 80);
+  --color-muted-foreground:   oklch(0.44  0.020 70);
+  --color-primary:            oklch(0.42  0.120 72);
+  --color-primary-foreground: oklch(0.985 0    0);
+  --color-destructive:        oklch(0.577 0.245 27.325);
+  --font-sans:    "Manrope",  system-ui, sans-serif;
+  --font-heading: "Spectral", Georgia,   serif;
+}
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground font-sans; }
+
+  ::-webkit-scrollbar        { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  { background: oklch(0.86 0.014 76); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: oklch(0.76 0.020 74); }
+
+  ::selection {
+    background: oklch(0.42 0.120 72 / 0.18);
+    color:      oklch(0.155 0.015 65);
+  }
+
+  input, textarea { caret-color: oklch(0.42 0.120 72); }
+}
+
+@keyframes spin      { to { transform: rotate(360deg); } }
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+@layer utilities {
+  .trace-entry { animation: fadeSlide 0.18s ease-out; }
+
+  .md-prose { font-size: 0.875rem; line-height: 1.65; color: oklch(0.155 0.015 65); }
+  .md-prose p              { margin-bottom: 0.5rem; }
+  .md-prose p:last-child   { margin-bottom: 0; }
+  .md-prose strong         { font-weight: 600; color: oklch(0.155 0.015 65); }
+  .md-prose ul             { list-style: disc; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+  .md-prose ol             { list-style: decimal; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+  .md-prose li             { margin-bottom: 0.2rem; }
+  .md-prose h3             { font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.25rem; }
+  .md-prose code           { font-family: monospace; font-size: 0.8em; background: oklch(0.948 0.012 80); padding: 0.1em 0.35em; border-radius: 4px; }
+
+  .btn-spinner {
+    display: inline-block; width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white; border-radius: 50%;
+    animation: spin 0.7s linear infinite; flex-shrink: 0;
+  }
+
+  .wait-spinner {
+    display: inline-block; width: 14px; height: 14px;
+    border: 2px solid oklch(0.882 0.015 76);
+    border-top-color: oklch(0.42 0.120 72); border-radius: 50%;
+    animation: spin 0.7s linear infinite; flex-shrink: 0;
+  }
+}
