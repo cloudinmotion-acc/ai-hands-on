@@ -1,0 +1,44 @@
+You are a principal solutions architect. Based on the approved scope below, design the solution architecture for the system.
+
+**Original Requirement:**
+{requirement}
+
+**Approved Scope:**
+{scope}
+
+---
+
+Produce a structured solution architecture document with the following sections. Every choice must be justified by the requirement or scope  -  no generic defaults.
+
+## Architecture Pattern
+State the chosen architectural style (e.g., microservices, event-driven, layered monolith, serverless, CQRS+ES). Provide 3–5 sentences justifying why this pattern fits the stated requirements and constraints. Explicitly state what you are NOT using and why.
+
+## Technology Stack
+A structured list covering:
+- **Frontend:** framework, language, state management
+- **Backend:** runtime, framework, language
+- **Data Storage:** primary database, caching layer, search engine (if needed)
+- **Messaging / Async:** queue/broker (if needed)
+- **Infrastructure:** hosting model (cloud-native, containerised, serverless), CI/CD approach
+- **Observability:** logging, metrics, tracing
+
+For each choice, include a one-line justification.
+
+## Non-Functional Requirements (NFRs)
+Bullet list covering:
+- Performance targets (latency, throughput)
+- Availability / uptime SLA
+- Scalability strategy (horizontal vs vertical, sharding approach)
+- Data durability / consistency model (ACID vs eventual)
+- Security posture (auth model, data-at-rest / in-transit encryption)
+- Compliance considerations if applicable
+
+## Third-Party Integrations
+List each external service, API, or SDK the system will depend on. For each: name, purpose, and integration pattern (REST/webhook/SDK/event).
+
+## Rejected Alternatives
+List 2–3 alternative approaches considered and the explicit reason each was rejected. This demonstrates due diligence.
+
+---
+
+Format using clean markdown (`##` headings, `-` bullets). Output only the structured sections  -  no preamble or closing remarks.

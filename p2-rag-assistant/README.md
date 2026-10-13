@@ -1,6 +1,6 @@
-# P2 — RAG Assistant
+# P2 - RAG Assistant
 
-Chat with your documents. Upload PDFs, Excel files, or text — the system chunks, embeds, and stores them in pgvector, then answers questions with citations.
+Chat with your documents. Upload PDFs, Excel files, or text - the system chunks, embeds, and stores them in pgvector, then answers questions with citations.
 
 ## What it does
 
@@ -42,6 +42,7 @@ npm install
 ```
 
 **backend/.env**
+
 ```
 NVIDIA_API_KEY=nvapi-your-key-here
 NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
@@ -55,10 +56,10 @@ DB_NAME=p2_rag
 ## Run
 
 ```bash
-# Terminal 1 — backend (from backend/)
+# Terminal 1 - backend (from backend/)
 uvicorn main:app --port 8000
 
-# Terminal 2 — frontend (from frontend/)
+# Terminal 2 - frontend (from frontend/)
 npm run dev
 ```
 
@@ -73,7 +74,7 @@ Open `http://localhost:3000`.
 ## Key endpoints
 
 | Method | Path | Description |
-|--------|------|-------------|
+| -------- | ------ | ------------- |
 | POST | `/ingest` | Upload and chunk a document |
 | POST | `/query` | Ask a question, get answer + citations |
 | GET | `/sources` | List all ingested documents |

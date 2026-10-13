@@ -1,7 +1,7 @@
 {
   "model": "nvidia/nemotron-3-super-120b-a12b",
   "prompt_version": "v1",
-  "top_k_chunks": 5,
+  "top_k_chunks": 4,
   "llm_params": {
     "temperature": 0.2,
     "max_tokens": 1024,

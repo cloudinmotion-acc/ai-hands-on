@@ -1,5 +1,5 @@
 """
-P5 MCP server — exposes the full hybrid search pipeline as a single tool.
+P5 MCP server  -  exposes the full hybrid search pipeline as a single tool.
 
 Tool: search_products(query, top_k=10)
   Pipeline:
@@ -33,7 +33,7 @@ mcp = FastMCP(name="p5-product-search")
 def _hard_filter(products: list[dict], filters: dict) -> list[dict]:
     """Keep only products that satisfy hard demographic/availability constraints.
 
-    Unisex products satisfy any gender request — a unisex hoodie is a valid
+    Unisex products satisfy any gender request  -  a unisex hoodie is a valid
     result for "fleece hoodie for men".
     """
     out = []
@@ -68,12 +68,12 @@ def search_products(query: str, top_k: int = 10) -> str:
           - decomposed: { semantic_query, filters }
           - results: list of product dicts with rrf_score
     """
-    # Step 1 — decompose
+    # Step 1  -  decompose
     decomposed = decomposer.decompose(query)
     sem_q   = decomposed["semantic_query"]
     filters = decomposed["filters"]
 
-    # Step 2 — run all three retrievers.
+    # Step 2  -  run all three retrievers.
     # Expand the pool when filters are present so post-filtering has headroom;
     # keep 2× otherwise to avoid diluting the RRF merge for open queries.
     pool_k         = top_k * 4 if filters else top_k * 2
@@ -81,12 +81,12 @@ def search_products(query: str, top_k: int = 10) -> str:
     bm25_results   = bm25_retriever.search(sem_q, top_k=pool_k)
     vector_results = vector_retriever.search(sem_q, top_k=pool_k)
 
-    # Step 3 — merge with RRF over the expanded pool
+    # Step 3  -  merge with RRF over the expanded pool
     merged = merger.merge(sql_results, bm25_results, vector_results, top_k=pool_k)
 
-    # Step 4 — enforce hard demographic/availability filters post-RRF.
+    # Step 4  -  enforce hard demographic/availability filters post-RRF.
     # BM25/vector can surface items of the wrong gender; this gates them out.
-    # Only gender and in_stock are hard gates — colour/fabric stay soft so
+    # Only gender and in_stock are hard gates  -  colour/fabric stay soft so
     # near-matches (e.g. georgette when user said cotton) can still surface.
     if filters:
         filtered = _hard_filter(merged, filters)

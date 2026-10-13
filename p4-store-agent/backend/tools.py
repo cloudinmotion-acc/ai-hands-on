@@ -1,5 +1,5 @@
 """
-P4 Store Agent — Tool Definitions
+P4 Store Agent - Tool Definitions
 Three tools the LangGraph agent can call. Each reads a JSON file,
 applies logic, and returns a structured dict. All errors are returned
 as {"error": "..."} so the agent can reason about them rather than crash.
@@ -27,7 +27,7 @@ def check_stock(product_name: str, color: str, size: str, quantity: int) -> dict
         product_name: Product type, e.g. 'Classic Cotton Shirt', 'Slim Fit Jeans',
                       'Polo T-Shirt', 'Pullover Hoodie', 'Bomber Jacket', 'Cargo Pants'
         color:        Color variant, e.g. 'Blue', 'Black', 'White', 'Navy', 'Olive'
-        size:         Size code — S, M, L, or XL
+        size:         Size code - S, M, L, or XL
         quantity:     How many units the customer wants
 
     Returns a dict with:

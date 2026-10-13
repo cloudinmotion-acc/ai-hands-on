@@ -21,9 +21,14 @@
       "description": "20% off on clearance items",
       "type": "sku",
       "skus": [
-        "JACKET-OLIVE-S", "JACKET-OLIVE-M",
-        "HOODIE-OLIVE-S", "HOODIE-OLIVE-M", "HOODIE-OLIVE-L", "HOODIE-OLIVE-XL",
-        "POLO-WHITE-XL", "SHIRT-BLUE-XL"
+        "JACKET-OLIVE-S",
+        "JACKET-OLIVE-M",
+        "HOODIE-OLIVE-S",
+        "HOODIE-OLIVE-M",
+        "HOODIE-OLIVE-L",
+        "HOODIE-OLIVE-XL",
+        "POLO-WHITE-XL",
+        "SHIRT-BLUE-XL"
       ],
       "discount_percent": 20
     },
@@ -36,5 +41,5 @@
     }
   ],
   "stacking": "best_single",
-  "note": "Only the best applicable discount is applied — rules do not stack."
+  "note": "Only the best applicable discount is applied - rules do not stack."
 }

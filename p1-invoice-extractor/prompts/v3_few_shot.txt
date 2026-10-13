@@ -15,7 +15,7 @@ EXAMPLE OUTPUT:
 }
 
 Notice:
-- "Estimate No" was used as invoice_no — the label doesn't matter, the number does.
+- "Estimate No" was used as invoice_no - the label doesn't matter, the number does.
 - No GST section means tax is null, not zero.
 - Vendor name has no address.
 

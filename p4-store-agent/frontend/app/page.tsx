@@ -3,9 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import {
-  Brain, Wrench, Eye, CheckCircle2, XCircle,
-  Play, RotateCcw, ChevronDown, ChevronRight, Package,
-  Zap, AlertTriangle, Tag, Truck, Copy, Clock,
+  Brain,
+  Wrench,
+  Eye,
+  CheckCircle2,
+  XCircle,
+  Play,
+  RotateCcw,
+  ChevronDown,
+  ChevronRight,
+  Package,
+  Zap,
+  AlertTriangle,
+  Tag,
+  Truck,
+  Copy,
+  Clock,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -19,8 +32,18 @@ type Scenario = {
 
 type TraceStep =
   | { type: "thought"; text: string }
-  | { type: "tool_call"; tool: string; input: Record<string, unknown>; expanded: boolean }
-  | { type: "observation"; tool: string; result: Record<string, unknown>; expanded: boolean }
+  | {
+      type: "tool_call";
+      tool: string;
+      input: Record<string, unknown>;
+      expanded: boolean;
+    }
+  | {
+      type: "observation";
+      tool: string;
+      result: Record<string, unknown>;
+      expanded: boolean;
+    }
   | { type: "error"; message: string };
 
 type RunState = "idle" | "running" | "done" | "error";
@@ -28,34 +51,63 @@ type RunState = "idle" | "running" | "done" | "error";
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const MODELS = [
-  { value: "nvidia/nemotron-3-super-120b-a12b", label: "nemotron-120B  (flagship)" },
+  {
+    value: "nvidia/nemotron-3-super-120b-a12b",
+    label: "nemotron-120B  (flagship)",
+  },
   { value: "meta/llama-3.2-90b-vision-instruct", label: "llama-90B  (large)" },
-  { value: "meta/llama-3.2-11b-vision-instruct", label: "llama-11B  (lightweight)" },
+  {
+    value: "meta/llama-3.2-11b-vision-instruct",
+    label: "llama-11B  (lightweight)",
+  },
 ];
 
-// Colours tuned for light background — 400-series is too low contrast on cream
-const TOOL_META: Record<string, { icon: React.ReactNode; colorCls: string; bgCls: string; label: string }> = {
-  check_stock:  { icon: <Package  className="w-3.5 h-3.5" />, colorCls: "text-amber-700",  bgCls: "bg-amber-500/10",  label: "check_stock"  },
-  price_order:  { icon: <Tag      className="w-3.5 h-3.5" />, colorCls: "text-teal-700",   bgCls: "bg-teal-500/10",   label: "price_order"  },
-  delivery_eta: { icon: <Truck    className="w-3.5 h-3.5" />, colorCls: "text-violet-700", bgCls: "bg-violet-500/10", label: "delivery_eta" },
+// Colours tuned for light background - 400-series is too low contrast on cream
+const TOOL_META: Record<
+  string,
+  { icon: React.ReactNode; colorCls: string; bgCls: string; label: string }
+> = {
+  check_stock: {
+    icon: <Package className="w-3.5 h-3.5" />,
+    colorCls: "text-amber-700",
+    bgCls: "bg-amber-500/10",
+    label: "check_stock",
+  },
+  price_order: {
+    icon: <Tag className="w-3.5 h-3.5" />,
+    colorCls: "text-teal-700",
+    bgCls: "bg-teal-500/10",
+    label: "price_order",
+  },
+  delivery_eta: {
+    icon: <Truck className="w-3.5 h-3.5" />,
+    colorCls: "text-violet-700",
+    bgCls: "bg-violet-500/10",
+    label: "delivery_eta",
+  },
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function fmt(v: unknown): string {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return " - ";
   if (typeof v === "boolean") return v ? "Yes" : "No";
   if (typeof v === "number") return v.toLocaleString("en-IN");
   return String(v);
 }
-function fmtINR(n: number) { return `₹${n.toLocaleString("en-IN")}`; }
+function fmtINR(n: number) {
+  return `₹${n.toLocaleString("en-IN")}`;
+}
 function fmtElapsed(ms: number) {
   const s = Math.floor(ms / 1000);
   return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
 }
 function parseError(raw: string): string {
-  if (raw.includes("Service temporarily overloaded") || raw.includes("overloaded_error"))
-    return "NVIDIA API is temporarily overloaded — the backend will retry automatically. If it keeps failing, wait a minute and try again.";
+  if (
+    raw.includes("Service temporarily overloaded") ||
+    raw.includes("overloaded_error")
+  )
+    return "NVIDIA API is temporarily overloaded - the backend will retry automatically. If it keeps failing, wait a minute and try again.";
   if (raw.includes("APIConnectionError") || raw.includes("Connection refused"))
     return "Cannot reach NVIDIA API. Check your connection.";
   if (raw.includes("rate_limit") || raw.includes("429"))
@@ -75,7 +127,9 @@ function StepBadge({ type, tool }: { type: string; tool?: string }) {
   if (type === "tool_call") {
     const m = tool ? TOOL_META[tool] : null;
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${m?.bgCls ?? "bg-amber-500/10"} ${m?.colorCls ?? "text-amber-700"}`}>
+      <span
+        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${m?.bgCls ?? "bg-amber-500/10"} ${m?.colorCls ?? "text-amber-700"}`}
+      >
         {m?.icon ?? <Wrench className="w-3 h-3" />} {m?.label ?? tool ?? "tool"}
       </span>
     );
@@ -83,7 +137,9 @@ function StepBadge({ type, tool }: { type: string; tool?: string }) {
   if (type === "observation") {
     const m = tool ? TOOL_META[tool] : null;
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${m?.bgCls ?? "bg-teal-500/10"} ${m?.colorCls ?? "text-teal-700"}`}>
+      <span
+        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${m?.bgCls ?? "bg-teal-500/10"} ${m?.colorCls ?? "text-teal-700"}`}
+      >
         <Eye className="w-3 h-3" /> Result
       </span>
     );
@@ -99,7 +155,13 @@ function JsonBlock({ data }: { data: Record<string, unknown> }) {
   );
 }
 
-function ObservationCard({ tool, result }: { tool: string; result: Record<string, unknown> }) {
+function ObservationCard({
+  tool,
+  result,
+}: {
+  tool: string;
+  result: Record<string, unknown>;
+}) {
   if (result.error) {
     return (
       <div className="mt-2 rounded-xl border border-fail/30 bg-fail/10 px-4 py-3 text-sm text-fail">
@@ -111,20 +173,40 @@ function ObservationCard({ tool, result }: { tool: string; result: Record<string
   if (tool === "check_stock") {
     const inStock = result.in_stock as boolean;
     return (
-      <div className={`mt-2 rounded-xl border px-4 py-3 text-sm ${inStock ? "border-pass/30 bg-pass/10" : "border-fail/30 bg-fail/10"}`}>
+      <div
+        className={`mt-2 rounded-xl border px-4 py-3 text-sm ${inStock ? "border-pass/30 bg-pass/10" : "border-fail/30 bg-fail/10"}`}
+      >
         <div className="flex items-center gap-2 mb-1.5">
-          {inStock
-            ? <CheckCircle2 className="w-4 h-4 text-pass" />
-            : <XCircle      className="w-4 h-4 text-fail" />}
-          <span className={`font-semibold ${inStock ? "text-pass" : "text-fail"}`}>
+          {inStock ? (
+            <CheckCircle2 className="w-4 h-4 text-pass" />
+          ) : (
+            <XCircle className="w-4 h-4 text-fail" />
+          )}
+          <span
+            className={`font-semibold ${inStock ? "text-pass" : "text-fail"}`}
+          >
             {inStock ? "In stock" : "Out of stock"}
           </span>
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
-          <span>SKU: <span className="text-foreground font-mono">{fmt(result.sku)}</span></span>
-          <span>Available: <span className="text-foreground">{fmt(result.available)}</span></span>
-          <span>Requested: <span className="text-foreground">{fmt(result.requested)}</span></span>
-          <span>Unit price: <span className="text-foreground">{fmtINR(result.unit_price as number)}</span></span>
+          <span>
+            SKU:{" "}
+            <span className="text-foreground font-mono">{fmt(result.sku)}</span>
+          </span>
+          <span>
+            Available:{" "}
+            <span className="text-foreground">{fmt(result.available)}</span>
+          </span>
+          <span>
+            Requested:{" "}
+            <span className="text-foreground">{fmt(result.requested)}</span>
+          </span>
+          <span>
+            Unit price:{" "}
+            <span className="text-foreground">
+              {fmtINR(result.unit_price as number)}
+            </span>
+          </span>
         </div>
       </div>
     );
@@ -138,13 +220,20 @@ function ObservationCard({ tool, result }: { tool: string; result: Record<string
         </div>
         {(result.discount_percent as number) > 0 && (
           <div className="flex items-center justify-between mt-1">
-            <span className="text-muted-foreground text-xs">{String(result.discount_label)}</span>
-            <span className="text-pass">−{fmtINR(result.discount_amount as number)} ({result.discount_percent}%)</span>
+            <span className="text-muted-foreground text-xs">
+              {String(result.discount_label)}
+            </span>
+            <span className="text-pass">
+              −{fmtINR(result.discount_amount as number)} (
+              {result.discount_percent}%)
+            </span>
           </div>
         )}
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-teal-600/20">
           <span className="font-semibold text-teal-700">Final total</span>
-          <span className="font-semibold text-teal-700 text-base">{fmtINR(result.final_total as number)}</span>
+          <span className="font-semibold text-teal-700 text-base">
+            {fmtINR(result.final_total as number)}
+          </span>
         </div>
       </div>
     );
@@ -153,10 +242,16 @@ function ObservationCard({ tool, result }: { tool: string; result: Record<string
     return (
       <div className="mt-2 rounded-xl border border-violet-600/20 bg-violet-500/5 px-4 py-3 text-sm">
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-          <span className="text-muted-foreground">Zone</span>      <span>{fmt(result.zone_label)}</span>
-          <span className="text-muted-foreground">Shipping</span>  <span className="capitalize">{fmt(result.shipping_type)}</span>
-          <span className="text-muted-foreground">Cost</span>      <span>{fmtINR(result.cost as number)}</span>
-          <span className="text-muted-foreground">ETA</span>       <span className="font-semibold text-violet-700">{fmt(result.estimated_delivery)}</span>
+          <span className="text-muted-foreground">Zone</span>{" "}
+          <span>{fmt(result.zone_label)}</span>
+          <span className="text-muted-foreground">Shipping</span>{" "}
+          <span className="capitalize">{fmt(result.shipping_type)}</span>
+          <span className="text-muted-foreground">Cost</span>{" "}
+          <span>{fmtINR(result.cost as number)}</span>
+          <span className="text-muted-foreground">ETA</span>{" "}
+          <span className="font-semibold text-violet-700">
+            {fmt(result.estimated_delivery)}
+          </span>
         </div>
       </div>
     );
@@ -165,7 +260,10 @@ function ObservationCard({ tool, result }: { tool: string; result: Record<string
 }
 
 function TraceEntry({
-  step, index, onToggle, isActiveThought,
+  step,
+  index,
+  onToggle,
+  isActiveThought,
 }: {
   step: TraceStep;
   index: number;
@@ -198,7 +296,9 @@ function TraceEntry({
     return (
       <div className="flex gap-3 trace-entry">
         <div className="flex flex-col items-center gap-1">
-          <div className={`w-6 h-6 rounded-full ${m.bgCls ?? "bg-amber-500/10"} border border-current/20 flex items-center justify-center shrink-0 ${m.colorCls ?? "text-amber-700"}`}>
+          <div
+            className={`w-6 h-6 rounded-full ${m.bgCls ?? "bg-amber-500/10"} border border-current/20 flex items-center justify-center shrink-0 ${m.colorCls ?? "text-amber-700"}`}
+          >
             {m.icon ?? <Wrench className="w-3 h-3" />}
           </div>
           <div className="w-px flex-1 bg-border" />
@@ -206,8 +306,15 @@ function TraceEntry({
         <div className="pb-4 min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <StepBadge type="tool_call" tool={step.tool} />
-            <button onClick={() => onToggle(index)} className="text-muted-foreground hover:text-foreground transition-colors">
-              {step.expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+            <button
+              onClick={() => onToggle(index)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {step.expanded ? (
+                <ChevronDown className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5" />
+              )}
             </button>
           </div>
           {step.expanded && <JsonBlock data={step.input} />}
@@ -220,7 +327,9 @@ function TraceEntry({
     return (
       <div className="flex gap-3 trace-entry">
         <div className="flex flex-col items-center gap-1">
-          <div className={`w-6 h-6 rounded-full ${m.bgCls ?? "bg-teal-500/10"} border border-current/20 flex items-center justify-center shrink-0 ${m.colorCls ?? "text-teal-700"}`}>
+          <div
+            className={`w-6 h-6 rounded-full ${m.bgCls ?? "bg-teal-500/10"} border border-current/20 flex items-center justify-center shrink-0 ${m.colorCls ?? "text-teal-700"}`}
+          >
             <Eye className="w-3 h-3" />
           </div>
           <div className="w-px flex-1 bg-border" />
@@ -228,8 +337,15 @@ function TraceEntry({
         <div className="pb-4 min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <StepBadge type="observation" tool={step.tool} />
-            <button onClick={() => onToggle(index)} className="text-muted-foreground hover:text-foreground transition-colors">
-              {step.expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+            <button
+              onClick={() => onToggle(index)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {step.expanded ? (
+                <ChevronDown className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5" />
+              )}
             </button>
           </div>
           <ObservationCard tool={step.tool} result={step.result} />
@@ -245,8 +361,12 @@ function TraceEntry({
           <AlertTriangle className="w-3 h-3 text-fail" />
         </div>
         <div className="pb-4 min-w-0 flex-1">
-          <span className="text-xs font-semibold text-fail uppercase tracking-wider">Error</span>
-          <p className="mt-1 text-sm text-fail/80 leading-relaxed">{parseError(step.message)}</p>
+          <span className="text-xs font-semibold text-fail uppercase tracking-wider">
+            Error
+          </span>
+          <p className="mt-1 text-sm text-fail/80 leading-relaxed">
+            {parseError(step.message)}
+          </p>
         </div>
       </div>
     );
@@ -257,22 +377,25 @@ function TraceEntry({
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function Page() {
-  const [scenarios, setScenarios]           = useState<Scenario[]>([]);
-  const [request, setRequest]               = useState("");
-  const [trace, setTrace]                   = useState<TraceStep[]>([]);
-  const [finalAnswer, setFinalAnswer]       = useState("");
-  const [runState, setRunState]             = useState<RunState>("idle");
+  const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const [request, setRequest] = useState("");
+  const [trace, setTrace] = useState<TraceStep[]>([]);
+  const [finalAnswer, setFinalAnswer] = useState("");
+  const [runState, setRunState] = useState<RunState>("idle");
   const [activeScenario, setActiveScenario] = useState<number | null>(null);
-  const [model, setModel]                   = useState(MODELS[0].value);
-  const [elapsed, setElapsed]               = useState(0);
-  const [copied, setCopied]                 = useState(false);
-  const [lastRequest, setLastRequest]       = useState("");
+  const [model, setModel] = useState(MODELS[0].value);
+  const [elapsed, setElapsed] = useState(0);
+  const [copied, setCopied] = useState(false);
+  const [lastRequest, setLastRequest] = useState("");
   const [answerExpanded, setAnswerExpanded] = useState(false);
   const traceEndRef = useRef<HTMLDivElement>(null);
-  const startRef    = useRef<number>(0);
+  const startRef = useRef<number>(0);
 
   useEffect(() => {
-    fetch("/api/scenarios").then(r => r.json()).then(d => setScenarios(d.scenarios ?? [])).catch(() => {});
+    fetch("/api/scenarios")
+      .then((r) => r.json())
+      .then((d) => setScenarios(d.scenarios ?? []))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -283,22 +406,30 @@ export default function Page() {
     if (runState !== "running") return;
     startRef.current = Date.now();
     setElapsed(0);
-    const id = setInterval(() => setElapsed(Date.now() - startRef.current), 500);
+    const id = setInterval(
+      () => setElapsed(Date.now() - startRef.current),
+      500,
+    );
     return () => clearInterval(id);
   }, [runState]);
 
   function toggleExpand(index: number) {
-    setTrace(prev =>
+    setTrace((prev) =>
       prev.map((s, i) =>
         i === index && (s.type === "tool_call" || s.type === "observation")
-          ? { ...s, expanded: !s.expanded } : s
-      )
+          ? { ...s, expanded: !s.expanded }
+          : s,
+      ),
     );
   }
 
   function reset() {
-    setTrace([]); setFinalAnswer(""); setRunState("idle");
-    setActiveScenario(null); setElapsed(0); setCopied(false);
+    setTrace([]);
+    setFinalAnswer("");
+    setRunState("idle");
+    setActiveScenario(null);
+    setElapsed(0);
+    setCopied(false);
   }
 
   function copyAnswer() {
@@ -310,8 +441,13 @@ export default function Page() {
 
   async function runAgent(req: string) {
     if (runState === "running" || !req.trim()) return;
-    setTrace([]); setFinalAnswer(""); setCopied(false); setElapsed(0); setAnswerExpanded(false);
-    setRunState("running"); setLastRequest(req);
+    setTrace([]);
+    setFinalAnswer("");
+    setCopied(false);
+    setElapsed(0);
+    setAnswerExpanded(false);
+    setRunState("running");
+    setLastRequest(req);
 
     try {
       const res = await fetch("/api/chat", {
@@ -319,11 +455,15 @@ export default function Page() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ request: req, model }),
       });
-      if (!res.ok || !res.body) { setRunState("error"); return; }
+      if (!res.ok || !res.body) {
+        setRunState("error");
+        return;
+      }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let buf = "", capturedAnswer = "";
+      let buf = "",
+        capturedAnswer = "";
 
       for (;;) {
         const { done, value } = await reader.read();
@@ -336,28 +476,51 @@ export default function Page() {
           const evM = frame.match(/^event: (.+)$/m);
           const daM = frame.match(/^data: (.+)$/m);
           if (!evM || !daM) continue;
-          const ev = evM[1], payload = JSON.parse(daM[1]);
+          const ev = evM[1],
+            payload = JSON.parse(daM[1]);
 
           if (ev === "thought") {
-            setTrace(prev => {
+            setTrace((prev) => {
               const last = prev[prev.length - 1];
               if (last?.type === "thought")
-                return [...prev.slice(0, -1), { ...last, text: last.text + payload.token }];
+                return [
+                  ...prev.slice(0, -1),
+                  { ...last, text: last.text + payload.token },
+                ];
               return [...prev, { type: "thought", text: payload.token }];
             });
           } else if (ev === "tool_call") {
-            setTrace(prev => [...prev, { type: "tool_call", tool: payload.tool, input: payload.input, expanded: false }]);
+            setTrace((prev) => [
+              ...prev,
+              {
+                type: "tool_call",
+                tool: payload.tool,
+                input: payload.input,
+                expanded: false,
+              },
+            ]);
           } else if (ev === "observation") {
-            setTrace(prev => [...prev, { type: "observation", tool: payload.tool, result: payload.result, expanded: true }]);
+            setTrace((prev) => [
+              ...prev,
+              {
+                type: "observation",
+                tool: payload.tool,
+                result: payload.result,
+                expanded: true,
+              },
+            ]);
           } else if (ev === "answer") {
             capturedAnswer = payload.text;
             setFinalAnswer(payload.text);
           } else if (ev === "error") {
-            setTrace(prev => [...prev, { type: "error", message: payload.message }]);
+            setTrace((prev) => [
+              ...prev,
+              { type: "error", message: payload.message },
+            ]);
           } else if (ev === "done") {
             if (!capturedAnswer) {
-              setTrace(prev => {
-                const thoughts = prev.filter(s => s.type === "thought");
+              setTrace((prev) => {
+                const thoughts = prev.filter((s) => s.type === "thought");
                 const last = thoughts[thoughts.length - 1];
                 if (last?.type === "thought") setFinalAnswer(last.text);
                 return prev;
@@ -373,40 +536,58 @@ export default function Page() {
   }
 
   const isRunning = runState === "running";
-  const isDone    = runState === "done" || runState === "error";
+  const isDone = runState === "done" || runState === "error";
 
-  const lastThoughtIdx = trace.reduce<number>((acc, s, i) => s.type === "thought" ? i : acc, -1);
-  const stockObs    = trace.find(s => s.type === "observation" && s.tool === "check_stock")  as Extract<TraceStep, { type: "observation" }> | undefined;
-  const priceObs    = trace.find(s => s.type === "observation" && s.tool === "price_order")  as Extract<TraceStep, { type: "observation" }> | undefined;
-  const deliveryObs = trace.find(s => s.type === "observation" && s.tool === "delivery_eta") as Extract<TraceStep, { type: "observation" }> | undefined;
-  const errorStep   = trace.find(s => s.type === "error")                                    as Extract<TraceStep, { type: "error" }>       | undefined;
+  const lastThoughtIdx = trace.reduce<number>(
+    (acc, s, i) => (s.type === "thought" ? i : acc),
+    -1,
+  );
+  const stockObs = trace.find(
+    (s) => s.type === "observation" && s.tool === "check_stock",
+  ) as Extract<TraceStep, { type: "observation" }> | undefined;
+  const priceObs = trace.find(
+    (s) => s.type === "observation" && s.tool === "price_order",
+  ) as Extract<TraceStep, { type: "observation" }> | undefined;
+  const deliveryObs = trace.find(
+    (s) => s.type === "observation" && s.tool === "delivery_eta",
+  ) as Extract<TraceStep, { type: "observation" }> | undefined;
+  const errorStep = trace.find((s) => s.type === "error") as
+    | Extract<TraceStep, { type: "error" }>
+    | undefined;
 
-  const showAnswerCard = isDone && (stockObs !== undefined || finalAnswer !== "");
-  const showErrorCard  = runState === "error" && !showAnswerCard;
+  const showAnswerCard =
+    isDone && (stockObs !== undefined || finalAnswer !== "");
+  const showErrorCard = runState === "error" && !showAnswerCard;
 
   return (
     <div className="flex flex-col h-dvh bg-background text-foreground">
-
-      {/* ── Header — same structure as P2 ── */}
+      {/* ── Header - same structure as P2 ── */}
       <header className="h-14 shrink-0 border-b border-border flex items-center px-5 gap-4">
-
         <div className="flex items-baseline gap-2 shrink-0">
           <span className="font-heading text-base font-semibold tracking-tight text-foreground">
             Store Assistant Agent
           </span>
-          <span className="text-xs text-muted-foreground">· LangGraph ReAct · P4</span>
+          <span className="text-xs text-muted-foreground">
+            · LangGraph ReAct · P4
+          </span>
         </div>
 
         {/* Model selector */}
         <div className="flex items-center gap-2">
-          <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">Model</span>
+          <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+            Model
+          </span>
           <select
             value={model}
-            onChange={e => setModel(e.target.value)}
+            onChange={(e) => setModel(e.target.value)}
             disabled={isRunning}
             className="h-7 px-2 rounded-md border border-border bg-card text-muted-foreground text-[11px] outline-none disabled:cursor-not-allowed cursor-pointer"
           >
-            {MODELS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+            {MODELS.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -422,13 +603,24 @@ export default function Page() {
 
         {/* Status */}
         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-          <span className={`w-1.5 h-1.5 rounded-full ${
-            isRunning              ? "bg-primary animate-pulse"
-            : runState === "done"  ? "bg-pass"
-            : runState === "error" ? "bg-fail"
-            : "bg-border"
-          }`} />
-          {isRunning ? "Running" : runState === "done" ? "Complete" : runState === "error" ? "Error" : "Idle"}
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              isRunning
+                ? "bg-primary animate-pulse"
+                : runState === "done"
+                  ? "bg-pass"
+                  : runState === "error"
+                    ? "bg-fail"
+                    : "bg-border"
+            }`}
+          />
+          {isRunning
+            ? "Running"
+            : runState === "done"
+              ? "Complete"
+              : runState === "error"
+                ? "Error"
+                : "Idle"}
         </div>
 
         {/* Reset */}
@@ -444,15 +636,18 @@ export default function Page() {
 
       {/* ── Body ── */}
       <div className="flex-1 flex min-h-0">
-
         {/* Left panel */}
         <aside className="w-80 shrink-0 border-r border-border flex flex-col p-5 gap-5 overflow-y-auto">
-
           <div className="flex flex-col gap-2">
-            <label className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Request</label>
+            <label className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
+              Request
+            </label>
             <textarea
               value={request}
-              onChange={e => { setRequest(e.target.value); setActiveScenario(null); }}
+              onChange={(e) => {
+                setRequest(e.target.value);
+                setActiveScenario(null);
+              }}
               placeholder="e.g. 2 blue shirts size M to 560001"
               rows={4}
               disabled={isRunning}
@@ -463,24 +658,38 @@ export default function Page() {
               disabled={isRunning || !request.trim()}
               className="flex items-center justify-center gap-2 h-9 rounded-xl bg-primary text-primary-foreground font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity cursor-pointer"
             >
-              {isRunning
-                ? <><span className="btn-spinner" />Running…</>
-                : <><Play className="w-3.5 h-3.5" />Run Agent</>}
+              {isRunning ? (
+                <>
+                  <span className="btn-spinner" />
+                  Running…
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5" />
+                  Run Agent
+                </>
+              )}
             </button>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="flex-1 h-px bg-border" />
-            <span className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">or try a scenario</span>
+            <span className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+              or try a scenario
+            </span>
             <div className="flex-1 h-px bg-border" />
           </div>
 
           <div className="flex flex-col gap-2">
-            {scenarios.map(s => (
+            {scenarios.map((s) => (
               <button
                 key={s.id}
                 disabled={isRunning}
-                onClick={() => { setRequest(s.request); setActiveScenario(s.id); runAgent(s.request); }}
+                onClick={() => {
+                  setRequest(s.request);
+                  setActiveScenario(s.id);
+                  runAgent(s.request);
+                }}
                 className={`w-full text-left p-3 rounded-xl border transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer ${
                   activeScenario === s.id
                     ? "border-primary bg-primary/10"
@@ -491,26 +700,54 @@ export default function Page() {
                   <span className="w-[18px] h-[18px] rounded-full bg-primary/20 text-primary text-[10px] font-bold flex items-center justify-center shrink-0">
                     {s.id}
                   </span>
-                  <span className="font-semibold text-xs text-foreground">{s.label}</span>
-                  {s.id === 2 && <Tag           className="w-2.5 h-2.5 text-muted-foreground" />}
-                  {s.id === 3 && <XCircle       className="w-2.5 h-2.5 text-fail" />}
-                  {s.id === 4 && <AlertTriangle className="w-2.5 h-2.5 text-amber-600" />}
-                  {s.id === 5 && <Zap           className="w-2.5 h-2.5 text-muted-foreground" />}
+                  <span className="font-semibold text-xs text-foreground">
+                    {s.label}
+                  </span>
+                  {s.id === 2 && (
+                    <Tag className="w-2.5 h-2.5 text-muted-foreground" />
+                  )}
+                  {s.id === 3 && <XCircle className="w-2.5 h-2.5 text-fail" />}
+                  {s.id === 4 && (
+                    <AlertTriangle className="w-2.5 h-2.5 text-amber-600" />
+                  )}
+                  {s.id === 5 && (
+                    <Zap className="w-2.5 h-2.5 text-muted-foreground" />
+                  )}
                 </div>
-                <p className="text-[11px] text-muted-foreground pl-[26px]">{s.description}</p>
+                <p className="text-[11px] text-muted-foreground pl-[26px]">
+                  {s.description}
+                </p>
               </button>
             ))}
           </div>
 
           <div className="mt-auto p-3 rounded-xl border border-border bg-card">
-            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground mb-2">ReAct loop</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground mb-2">
+              ReAct loop
+            </p>
             {[
-              { icon: <Brain  className="w-3 h-3" />, cls: "text-primary",    label: "Reason" },
-              { icon: <Wrench className="w-3 h-3" />, cls: "text-amber-700",  label: "Act (tool call)" },
-              { icon: <Eye    className="w-3 h-3" />, cls: "text-teal-700",   label: "Observe (result)" },
+              {
+                icon: <Brain className="w-3 h-3" />,
+                cls: "text-primary",
+                label: "Reason",
+              },
+              {
+                icon: <Wrench className="w-3 h-3" />,
+                cls: "text-amber-700",
+                label: "Act (tool call)",
+              },
+              {
+                icon: <Eye className="w-3 h-3" />,
+                cls: "text-teal-700",
+                label: "Observe (result)",
+              },
             ].map(({ icon, cls, label }) => (
-              <div key={label} className="flex items-center gap-2 mb-1.5 text-[11px] text-muted-foreground">
-                <span className={cls}>{icon}</span>{label}
+              <div
+                key={label}
+                className="flex items-center gap-2 mb-1.5 text-[11px] text-muted-foreground"
+              >
+                <span className={cls}>{icon}</span>
+                {label}
               </div>
             ))}
           </div>
@@ -518,9 +755,10 @@ export default function Page() {
 
         {/* Right panel */}
         <div className="flex-1 flex flex-col min-w-0 min-h-0">
-
           <div className="px-6 py-3 border-b border-border flex items-center gap-2 shrink-0">
-            <span className="font-semibold text-sm text-foreground">Agent Trace</span>
+            <span className="font-semibold text-sm text-foreground">
+              Agent Trace
+            </span>
             {trace.length > 0 && (
               <span className="px-2 py-0.5 rounded-full text-[11px] bg-muted text-muted-foreground">
                 {trace.length} steps
@@ -535,7 +773,8 @@ export default function Page() {
                   <Brain className="w-5 h-5 text-primary" />
                 </div>
                 <p className="text-sm text-muted-foreground max-w-[280px] leading-relaxed">
-                  Run a request to watch the agent reason → call tools → observe results in real-time.
+                  Run a request to watch the agent reason → call tools → observe
+                  results in real-time.
                 </p>
               </div>
             )}
@@ -548,7 +787,9 @@ export default function Page() {
 
             {trace.map((step, i) => (
               <TraceEntry
-                key={i} step={step} index={i}
+                key={i}
+                step={step}
+                index={i}
                 onToggle={toggleExpand}
                 isActiveThought={isRunning && i === lastThoughtIdx}
               />
@@ -559,8 +800,8 @@ export default function Page() {
           {/* ── Answer card ── */}
           {showAnswerCard && (
             <div className="border-t border-border px-6 py-4 shrink-0 bg-card">
-              {stockObs && (
-                (stockObs.result.in_stock === false || stockObs.result.error) ? (
+              {stockObs &&
+                (stockObs.result.in_stock === false || stockObs.result.error ? (
                   <div className="flex items-center gap-2.5">
                     <XCircle className="w-5 h-5 text-fail shrink-0" />
                     <div>
@@ -577,13 +818,19 @@ export default function Page() {
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-5 h-5 text-pass shrink-0" />
                       <div>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-[0.08em]">In stock</p>
-                        <p className="font-semibold text-pass">{fmt(stockObs.result.available)} available</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-[0.08em]">
+                          In stock
+                        </p>
+                        <p className="font-semibold text-pass">
+                          {fmt(stockObs.result.available)} available
+                        </p>
                       </div>
                     </div>
                     {priceObs && !priceObs.result.error && (
                       <div>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-[0.08em]">Total</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-[0.08em]">
+                          Total
+                        </p>
                         <p className="font-bold text-base text-foreground">
                           {fmtINR(priceObs.result.final_total as number)}
                           {(priceObs.result.discount_percent as number) > 0 && (
@@ -596,34 +843,49 @@ export default function Page() {
                     )}
                     {deliveryObs && !deliveryObs.result.error && (
                       <div>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-[0.08em]">Arrives by</p>
-                        <p className="font-semibold text-foreground">{fmt(deliveryObs.result.estimated_delivery)}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-[0.08em]">
+                          Arrives by
+                        </p>
+                        <p className="font-semibold text-foreground">
+                          {fmt(deliveryObs.result.estimated_delivery)}
+                        </p>
                         <p className="text-[11px] text-muted-foreground">
-                          {fmt(deliveryObs.result.zone_label)} · {fmtINR(deliveryObs.result.cost as number)} shipping
+                          {fmt(deliveryObs.result.zone_label)} ·{" "}
+                          {fmtINR(deliveryObs.result.cost as number)} shipping
                         </p>
                       </div>
                     )}
                     {deliveryObs?.result.error && (
                       <div className="flex items-center gap-1.5">
                         <AlertTriangle className="w-4 h-4 text-amber-600" />
-                        <span className="text-xs text-amber-700">Delivery unavailable: {String(deliveryObs.result.error)}</span>
+                        <span className="text-xs text-amber-700">
+                          Delivery unavailable:{" "}
+                          {String(deliveryObs.result.error)}
+                        </span>
                       </div>
                     )}
                   </div>
-                )
-              )}
+                ))}
 
               {finalAnswer && (
-                <div className={stockObs ? "mt-3 pt-3 border-t border-border" : ""}>
+                <div
+                  className={stockObs ? "mt-3 pt-3 border-t border-border" : ""}
+                >
                   {/* Toggle row */}
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => setAnswerExpanded(v => !v)}
+                      onClick={() => setAnswerExpanded((v) => !v)}
                       className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg border border-border bg-muted/50 text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
                     >
-                      {answerExpanded
-                        ? <><ChevronDown className="w-3 h-3" /> Hide answer</>
-                        : <><ChevronRight className="w-3 h-3" /> View full answer</>}
+                      {answerExpanded ? (
+                        <>
+                          <ChevronDown className="w-3 h-3" /> Hide answer
+                        </>
+                      ) : (
+                        <>
+                          <ChevronRight className="w-3 h-3" /> View full answer
+                        </>
+                      )}
                     </button>
                     <button
                       onClick={copyAnswer}
@@ -664,7 +926,9 @@ export default function Page() {
             <div className="border-t border-border px-6 py-4 shrink-0 bg-card flex items-center gap-3">
               <AlertTriangle className="w-4 h-4 text-fail shrink-0" />
               <span className="text-sm text-fail flex-1">
-                {errorStep ? parseError(errorStep.message) : "Agent failed. Retry or wait a moment."}
+                {errorStep
+                  ? parseError(errorStep.message)
+                  : "Agent failed. Retry or wait a moment."}
               </span>
               <button
                 onClick={() => runAgent(lastRequest)}

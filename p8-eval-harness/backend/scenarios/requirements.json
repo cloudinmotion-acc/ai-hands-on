@@ -1,0 +1,77 @@
+[
+  {
+    "id": 1,
+    "title": "LinkedIn Post Scheduler",
+    "requirement": "Build a LinkedIn post scheduling assistant that lets content creators write post drafts, schedule them for optimal engagement times, and get AI-suggested reactions. It should support multiple social accounts and provide analytics on post performance."
+  },
+  {
+    "id": 2,
+    "title": "Corporate Expense Management",
+    "requirement": "Build an internal expense management system for a 500-person company. Employees submit receipts via mobile, the system auto-categorizes expenses, and managers approve or reject with comments. Finance needs monthly consolidated reports and budget vs. actual dashboards."
+  },
+  {
+    "id": 3,
+    "title": "Retail Inventory Tracker",
+    "requirement": "Create a real-time inventory tracking system for a chain of 50 retail stores. Each store syncs stock levels every 15 minutes. The system alerts buyers when stock drops below dynamic reorder thresholds and suggests reorder quantities based on historical sales velocity."
+  },
+  {
+    "id": 4,
+    "title": "Healthcare Appointment Scheduling",
+    "requirement": "Build a patient appointment scheduling system for a multi-clinic healthcare network. Patients book online, receive SMS and email reminders, and can reschedule without calling. Clinicians see their daily schedule with a brief patient history summary. Integrates with existing EHR."
+  },
+  {
+    "id": 5,
+    "title": "Code Review Platform",
+    "requirement": "Create a collaborative code review platform for distributed engineering teams. Features: inline PR comments with threaded replies, AI-powered code quality and security analysis, reviewer assignment rules based on code ownership, and bidirectional GitHub sync."
+  },
+  {
+    "id": 6,
+    "title": "SaaS Subscription Billing",
+    "requirement": "Build a subscription billing platform for a SaaS product. Support monthly and annual plans, 14-day trials, dunning workflows for failed payments with configurable retry schedules, proration on mid-cycle plan changes, and usage-based billing for API call volumes."
+  },
+  {
+    "id": 7,
+    "title": "AI Support Ticket Router",
+    "requirement": "Create an AI-powered customer support ticket routing system. Incoming tickets are classified by topic and urgency using NLP, routed to the appropriate team queue, auto-responded for known FAQs, and escalated to a supervisor when the SLA deadline is at risk."
+  },
+  {
+    "id": 8,
+    "title": "Data Pipeline Monitor",
+    "requirement": "Build a data pipeline monitoring dashboard for an analytics team. Track job success and failure rates, data freshness, schema drift alerts, and SLA breaches across 200+ pipelines. Send PagerDuty alerts for critical failures. Show historical trends and root cause classification."
+  },
+  {
+    "id": 9,
+    "title": "Fleet Management System",
+    "requirement": "Create a fleet management system for a logistics company with 300 vehicles. Provide real-time GPS tracking, AI-driven route optimization, driver performance scoring, preventive maintenance scheduling based on mileage and engine data, and fuel consumption analytics."
+  },
+  {
+    "id": 10,
+    "title": "HR Platform for Mid-size Companies",
+    "requirement": "Build a multi-tenant SaaS platform for HR teams at companies with 50-500 employees. Features: employee onboarding workflows with task checklists, 360-degree performance review cycles, org chart visualization, time-off tracking with approval workflows, and payroll system integration."
+  },
+  {
+    "id": 11,
+    "title": "Video Content Moderation",
+    "requirement": "Create a video content moderation system for a social platform processing 50,000 uploads per day. Auto-detect policy violations using computer vision, queue borderline content for human review with priority scoring, track reviewer decisions and inter-annotator agreement, and handle user appeals."
+  },
+  {
+    "id": 12,
+    "title": "Developer API Marketplace",
+    "requirement": "Build a developer API marketplace where companies publish and monetize APIs. Features: API versioning with deprecation notices, per-plan rate limiting and quota enforcement, usage analytics for publishers, automatic SDK generation in 5 languages, and Stripe billing integration."
+  },
+  {
+    "id": 13,
+    "title": "Smart Home Energy Manager",
+    "requirement": "Create a smart home energy management system. Monitor electricity consumption per device in real time, suggest optimal scheduling for high-draw appliances, integrate with solar panels and home battery systems, and provide cost predictions based on real-time utility rates and weather forecasts."
+  },
+  {
+    "id": 14,
+    "title": "Peer-to-Peer Lending Platform",
+    "requirement": "Build a peer-to-peer lending platform. Borrowers submit loan applications with supporting documents, an ML model scores credit risk, verified lenders browse opportunities and fund in fractional amounts, the platform handles repayment collection, and compliance reports go to financial regulators."
+  },
+  {
+    "id": 15,
+    "title": "Supply Chain Visibility",
+    "requirement": "Create a supply chain visibility platform for a manufacturing company. Track raw materials from 80 suppliers through 3 factories to 200 distributors. Provide real-time shipment status, ML-based delay predictions, automated supplier notifications for deviations, and root cause analysis dashboards."
+  }
+]

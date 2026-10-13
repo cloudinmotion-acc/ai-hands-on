@@ -1,10 +1,10 @@
 """
-P5 Eval — precision@5 comparison across three retrieval modes.
+P5 Eval  -  precision@5 comparison across three retrieval modes.
 
 For each of the 15 queries, runs all three retrieval modes:
-  1. vector_only     — vector_retriever.search() alone
-  2. bm25_only       — bm25_retriever.search() alone
-  3. hybrid (full)   — sql + bm25 + vector → RRF merge (via mcp_server)
+  1. vector_only      -  vector_retriever.search() alone
+  2. bm25_only        -  bm25_retriever.search() alone
+  3. hybrid (full)    -  sql + bm25 + vector → RRF merge (via mcp_server)
 
 Metrics per mode:
   - precision@5        : fraction of top-5 results in expected_ids
@@ -44,7 +44,7 @@ TOP_K = 5
 
 def precision_at_k(results: list[dict], expected_ids: list[int], k: int) -> float:
     if not expected_ids:
-        return -1.0  # sentinel — not measurable
+        return -1.0  # sentinel  -  not measurable
     top_ids = [r["id"] for r in results[:k]]
     hits = sum(1 for pid in top_ids if pid in expected_ids)
     return hits / min(k, len(top_ids)) if top_ids else 0.0
@@ -62,13 +62,13 @@ def run_query(query_obj: dict) -> dict:
     q   = query_obj["query"]
     exp = query_obj.get("expected_ids", [])
 
-    # Mode 1 — BM25 only
+    # Mode 1  -  BM25 only
     bm25_res = bm25_retriever.search(q, top_k=TOP_K)
 
-    # Mode 2 — Vector only
+    # Mode 2  -  Vector only
     vec_res = vector_retriever.search(q, top_k=TOP_K)
 
-    # Mode 3 — Full hybrid (decompose → sql + bm25 + vector → RRF)
+    # Mode 3  -  Full hybrid (decompose → sql + bm25 + vector → RRF)
     raw = search_products(query=q, top_k=TOP_K)
     hybrid_data = json.loads(raw)
     hybrid_res  = hybrid_data["results"]

@@ -31,7 +31,7 @@ if uploaded:
     display = result.model_dump(mode="json")
     st.dataframe(
         data={"Field": list(display.keys()),
-              "Value": [str(v) if v is not None else "—" for v in display.values()]},
+              "Value": [str(v) if v is not None else " - " for v in display.values()]},
         width="stretch",
     )
 

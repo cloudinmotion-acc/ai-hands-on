@@ -1,5 +1,5 @@
 """
-P3 — RAG Quality Gate Dashboard
+P3 - RAG Quality Gate Dashboard
 Run: streamlit run dashboard.py  (from p3-rag-eval/)
 """
 import json
@@ -30,7 +30,7 @@ LABELS = {
 DESCRIPTIONS = {
     "context_precision": "Relevant chunks retrieved vs total retrieved",
     "context_recall":    "Relevant chunks found vs all relevant in DB",
-    "faithfulness":      "Answer grounded in context — no hallucination",
+    "faithfulness":      "Answer grounded in context - no hallucination",
     "answer_relevancy":  "Answer addresses the question asked",
     "refusal_accuracy":  "Correct refusals on unanswerable questions",
 }
@@ -234,7 +234,7 @@ def metric_card(label: str, score: float, threshold: float, desc: str) -> str:
 
 def score_bar(value, threshold) -> str:
     if value is None or (isinstance(value, float) and pd.isna(value)):
-        return "<span style='color:#333;font-size:11px'>—</span>"
+        return "<span style='color:#333;font-size:11px'> - </span>"
     v = float(value)
     pct   = min(v * 100, 100)
     color = "#00C851" if v >= threshold else "#FF3B30"
@@ -262,7 +262,7 @@ with h_left:
             <span class="acn-wordmark">Accenture</span>
             <span class="acn-chevron">&#8250;</span>
             <div class="acn-divider"></div>
-            <span class="acn-title">RAG Quality Gate — P3</span>
+            <span class="acn-title">RAG Quality Gate - P3</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -304,7 +304,7 @@ n_fail = len(THRESHOLDS) - n_pass
 v_cls  = "verdict-pass" if overall_pass else "verdict-fail"
 v_word = "PASS" if overall_pass else "FAIL"
 v_msg  = (
-    "All metrics cleared — system ready to ship"
+    "All metrics cleared - system ready to ship"
     if overall_pass
     else f"{n_fail} of {len(THRESHOLDS)} metrics below threshold"
 )
@@ -337,7 +337,7 @@ info_cols = st.columns(5, gap="small")
 n_total   = len(per_q)
 n_ans     = sum(1 for r in per_q if r.get("answerable"))
 run_at    = report.get("run_at", "")
-run_str   = "—"
+run_str   = " - "
 if run_at:
     try:
         run_str = datetime.fromisoformat(run_at.replace("Z", "+00:00")).strftime("%Y-%m-%d %H:%M UTC")
@@ -351,9 +351,9 @@ with info_cols[1]:
 with info_cols[2]:
     st.metric("Unanswerable", n_total - n_ans)
 with info_cols[3]:
-    st.metric("Generator", report.get("eval_model", "—").split("/")[-1])
+    st.metric("Generator", report.get("eval_model", " - ").split("/")[-1])
 with info_cols[4]:
-    st.metric("Judge", report.get("judge_model", "—").split("/")[-1])
+    st.metric("Judge", report.get("judge_model", " - ").split("/")[-1])
 
 
 # ── per-question table ────────────────────────────────────────────────────────
@@ -388,7 +388,7 @@ if sel_status:
 
 def _fmt(v, thr=None):
     if v is None or (isinstance(v, float) and pd.isna(v)):
-        return "—"
+        return " - "
     v = float(v)
     if thr is not None:
         return f"{'↑' if v >= thr else '↓'} {v:.3f}"
@@ -469,7 +469,7 @@ else:
         ans_color = "#00C851" if passed else "#FF3B30"
         st.markdown(
             f"<div class='d-card'><div class='d-lbl'>System Answer</div>"
-            f"<div class='d-txt' style='color:{ans_color}'>{row.get('answer','—')}</div></div>",
+            f"<div class='d-txt' style='color:{ans_color}'>{row.get('answer',' - ')}</div></div>",
             unsafe_allow_html=True,
         )
         reasoning = str(row.get("judge_reasoning", "")).strip()
@@ -494,17 +494,17 @@ else:
                     st.metric(label, f"{val:.3f}", f"{val-thr:+.3f}",
                               delta_color="normal" if val >= thr else "inverse")
                 else:
-                    st.metric(label, "—")
+                    st.metric(label, " - ")
         with dm[4]:
             jc = row.get("judge_correctness")
             if jc is not None and str(jc) != "nan":
                 st.metric("Judge /5", int(jc), f"{int(jc)-3:+d} vs mid")
             else:
-                st.metric("Judge /5", "—")
+                st.metric("Judge /5", " - ")
 
     contexts = row.get("contexts") or []
     if contexts:
-        with st.expander(f"Retrieved chunks — {len(contexts)} total"):
+        with st.expander(f"Retrieved chunks - {len(contexts)} total"):
             for i, ctx in enumerate(contexts, 1):
                 st.markdown(
                     f"<div style='font-size:10px;font-weight:700;color:#333;letter-spacing:0.08em;"
@@ -527,7 +527,7 @@ else:
     w_cols = st.columns(5, gap="small")
     for i, (_, r) in enumerate(worst5.iterrows()):
         comp = float(r.get("composite") or 0)
-        clf  = str(r.get("classification") or "—").upper()
+        clf  = str(r.get("classification") or " - ").upper()
         q    = str(r["question"])
         with w_cols[i]:
             st.markdown(

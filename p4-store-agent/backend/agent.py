@@ -1,5 +1,5 @@
 """
-P4 Store Agent — LangGraph Definition
+P4 Store Agent - LangGraph Definition
 
 Architecture:
   START → [agent] → (tool_calls?) → [tools] → [agent] → ... → END
@@ -55,9 +55,9 @@ TOOLS = [check_stock, price_order, delivery_eta]
 SYSTEM_PROMPT = """You are a helpful store assistant for an online clothing retailer.
 
 When a customer makes a request, you MUST follow this exact sequence using your tools:
-1. check_stock  — verify the item is available in the requested quantity
-2. price_order  — calculate the total price with any applicable discount
-3. delivery_eta — look up the estimated delivery date for the pincode
+1. check_stock  - verify the item is available in the requested quantity
+2. price_order  - calculate the total price with any applicable discount
+3. delivery_eta - look up the estimated delivery date for the pincode
 
 Rules:
 - If check_stock returns in_stock=false, stop immediately and tell the customer the item is out of stock. Do NOT call price_order or delivery_eta.

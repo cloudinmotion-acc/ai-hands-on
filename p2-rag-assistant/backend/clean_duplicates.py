@@ -68,7 +68,7 @@ def main() -> None:
     print(f"\nredundant duplicate rows overall: {dupes}")
 
     if not apply_changes:
-        print("\nReport only — nothing was changed.")
+        print("\nReport only - nothing was changed.")
         print("Re-run with --apply to delete temp-named rows and exact duplicates.")
         return
 

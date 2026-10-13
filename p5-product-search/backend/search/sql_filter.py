@@ -2,17 +2,17 @@
 SQL filter retriever for P5.
 
 Takes a structured filter dict (from the decomposer) and returns matching
-product rows directly from Postgres — no embeddings needed.
+product rows directly from Postgres  -  no embeddings needed.
 
 Filter keys (all optional):
-    category  : str   — "kids", "teens", "women", "men"
-    gender    : str   — "boys", "girls", "unisex", "women", "men"
-    colour    : str   — e.g. "white", "blue"
-    fabric    : str   — e.g. "cotton", "denim"
-    min_age   : int   — minimum age in years
-    max_age   : int   — maximum age in years
-    max_price : int   — upper price bound (INR)
-    in_stock  : bool  — True to restrict to in-stock only
+    category  : str    -  "kids", "teens", "women", "men"
+    gender    : str    -  "boys", "girls", "unisex", "women", "men"
+    colour    : str    -  e.g. "white", "blue"
+    fabric    : str    -  e.g. "cotton", "denim"
+    min_age   : int    -  minimum age in years
+    max_age   : int    -  maximum age in years
+    max_price : int    -  upper price bound (INR)
+    in_stock  : bool   -  True to restrict to in-stock only
 """
 
 import os

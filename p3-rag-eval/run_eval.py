@@ -1,5 +1,5 @@
 """
-P3 RAG Quality Gate — Evaluation Runner
+P3 RAG Quality Gate - Evaluation Runner
 
 Prerequisites:
   1. All 4 test docs ingested into P2 (product_manual.txt, company_policy.pdf,
@@ -42,10 +42,10 @@ NVIDIA_API_KEY  = os.getenv("NVIDIA_API_KEY", "")
 P2_BASE_URL     = os.getenv("P2_BASE_URL", "http://localhost:8000")
 NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
 
-# The model P2 uses to generate answers — same as your RAG pipeline
+# The model P2 uses to generate answers - same as your RAG pipeline
 EVAL_MODEL  = os.getenv("EVAL_MODEL",  "nvidia/nemotron-3-super-120b-a12b")
 
-# A DIFFERENT model used as judge + RAGAS scorer — must NOT be the same as EVAL_MODEL.
+# A DIFFERENT model used as judge + RAGAS scorer - must NOT be the same as EVAL_MODEL.
 # gpt-oss-20b is a reasoning model: it produces chain-of-thought in reasoning_content
 # before giving its final JSON answer, making it a stronger, less biased judge.
 JUDGE_MODEL = os.getenv("JUDGE_MODEL", "openai/gpt-oss-20b")
@@ -91,7 +91,7 @@ DEFAULT_CONFIG = {
     # content comes back empty. Leave blank for providers that reject the field.
     "judge_reasoning_effort": "",
     # Embeddings are a separate role from judging. answer_relevancy needs a real
-    # embedding model, and a local chat model cannot serve /v1/embeddings — so
+    # embedding model, and a local chat model cannot serve /v1/embeddings - so
     # this stays on NVIDIA even when the judge is pointed at Ollama.
     "embed_model":    EMBED_MODEL,
     "embed_base_url": NVIDIA_BASE_URL,
@@ -134,7 +134,7 @@ def save_checkpoint(phase: int, rows: list[dict], fingerprint: str) -> None:
     RESULTS_DIR.mkdir(exist_ok=True)
     with open(CHECKPOINT, "w") as f:
         json.dump({"phase": phase, "rows": rows, "config": fingerprint}, f, indent=2)
-    print(f"  [checkpoint] phase {phase} saved — safe to Ctrl+C and resume later.")
+    print(f"  [checkpoint] phase {phase} saved - safe to Ctrl+C and resume later.")
 
 
 def load_checkpoint(fingerprint: str) -> tuple[int, list[dict]] | None:
@@ -148,7 +148,7 @@ def load_checkpoint(fingerprint: str) -> tuple[int, list[dict]] | None:
     with open(CHECKPOINT) as f:
         data = json.load(f)
     if data.get("config") != fingerprint:
-        print("Settings changed since the last run — discarding stale checkpoint.")
+        print("Settings changed since the last run - discarding stale checkpoint.")
         CHECKPOINT.unlink()
         return None
     return data["phase"], data["rows"]
@@ -157,7 +157,7 @@ def load_checkpoint(fingerprint: str) -> tuple[int, list[dict]] | None:
 # ── helpers ──────────────────────────────────────────────────────────────────
 
 def _make_llm(model: str, temperature: float = 0.0, timeout: int = 300):
-    """LangChain wrapper — used for RAGAS internal scoring."""
+    """LangChain wrapper - used for RAGAS internal scoring."""
     from langchain_openai import ChatOpenAI
     return ChatOpenAI(
         model=model,
@@ -171,7 +171,7 @@ def _make_llm(model: str, temperature: float = 0.0, timeout: int = 300):
 
 def _make_judge_client() -> OpenAI:
     """
-    Raw OpenAI client for the judge — needed to access reasoning_content.
+    Raw OpenAI client for the judge - needed to access reasoning_content.
     base_url is configurable so the judge can point at a local OpenAI-compatible
     server (e.g. Ollama at http://localhost:11434/v1) instead of NVIDIA.
     """
@@ -217,7 +217,7 @@ def query_p2(question: str) -> dict:
 # ── step 2: LLM-as-judge ─────────────────────────────────────────────────────
 
 JUDGE_PROMPT = textwrap.dedent("""
-    You are evaluating a RAG system answer. Output ONLY valid JSON — no prose, no markdown.
+    You are evaluating a RAG system answer. Output ONLY valid JSON - no prose, no markdown.
 
     Question: {question}
     Retrieved context (excerpt): {context}
@@ -240,7 +240,7 @@ def _coerce_score(value) -> int | None:
 
     Smaller instruct models answer the faithfulness/correctness fields with
     `true` instead of a number. bool is a subclass of int in Python, so a naive
-    int() check turns that into 1 — a bottom score indistinguishable from a real
+    int() check turns that into 1 - a bottom score indistinguishable from a real
     measurement. Booleans and out-of-range values are rejected outright.
     """
     if isinstance(value, bool):
@@ -257,7 +257,7 @@ def extract_judge_json(content: str) -> dict | None:
     Pull the score object out of a judge response.
 
     Thinking models (gpt-oss, Qwen3) narrate before answering, and that narration
-    routinely contains braces — so a greedy {.*} match spans from a brace inside
+    routinely contains braces - so a greedy {.*} match spans from a brace inside
     the reasoning to the final one and fails to parse. Strip the think block,
     then scan for balanced objects and take the last one carrying the score keys.
     """
@@ -331,7 +331,7 @@ def judge_answer(client: OpenAI, question: str, contexts: list[str], answer: str
     except Exception as e:
         print(f"    judge error: {e}")
     # Neutral 3/3 keeps one bad response from dominating, but it is still a
-    # fabricated score — the caller counts these so they can be reported.
+    # fabricated score - the caller counts these so they can be reported.
     return {"faithfulness": 3, "correctness": 3, "reasoning": "parse error"}
 
 
@@ -343,7 +343,7 @@ def run_ragas(answerable_rows: list[dict]) -> pd.DataFrame:
     from ragas import EvaluationDataset, SingleTurnSample, evaluate
     from ragas.llms import llm_factory
     from ragas.embeddings import OpenAIEmbeddings as RagasOpenAIEmbeddings
-    # Use the old-style Metric subclasses — they pass the isinstance(m, Metric)
+    # Use the old-style Metric subclasses - they pass the isinstance(m, Metric)
     # check inside evaluate(). The new ragas.metrics.collections classes use a
     # separate BaseMetric hierarchy incompatible with evaluate() in RAGAS 0.4.3.
     with warnings.catch_warnings():
@@ -374,7 +374,7 @@ def run_ragas(answerable_rows: list[dict]) -> pd.DataFrame:
     # Embeddings use their own client: the judge may be a local chat model with
     # no /v1/embeddings route, while answer_relevancy always needs real vectors.
     # Sync, because _ResponseRelevancy calls embed_query/embed_documents from
-    # inside RAGAS's async pipeline — asyncio.run() there would nest event loops.
+    # inside RAGAS's async pipeline - asyncio.run() there would nest event loops.
     _sync_embed = OpenAI(
         base_url=embed_url,
         api_key=NVIDIA_API_KEY,
@@ -424,7 +424,7 @@ def run_ragas(answerable_rows: list[dict]) -> pd.DataFrame:
         _Faithfulness(),
         _ResponseRelevancy(strictness=1),
     ]
-    # Throttle concurrency — RAGAS fires all 64 jobs at once by default, which
+    # Throttle concurrency - RAGAS fires all 64 jobs at once by default, which
     # immediately saturates the NVIDIA free-tier rate limit and returns 0s for
     # every metric. max_workers=2 keeps it within quota without being too slow.
     try:
@@ -495,14 +495,14 @@ def main():
     checkpoint = load_checkpoint(fingerprint)
     if checkpoint:
         done_phase, rows = checkpoint
-        print(f"Resuming from checkpoint — phase {done_phase} already done ({len(rows)} rows loaded).")
+        print(f"Resuming from checkpoint - phase {done_phase} already done ({len(rows)} rows loaded).")
     else:
         done_phase = 0
         rows = []
 
     # ── Phase 1: query P2 ───────────────────────────────────────────────────
     if done_phase < 1:
-        print(f"Phase 1/3 — Querying P2 ({P2_BASE_URL}) for {len(dataset)} questions...")
+        print(f"Phase 1/3 - Querying P2 ({P2_BASE_URL}) for {len(dataset)} questions...")
         for i, item in enumerate(dataset, 1):
             label = item["question"][:65]
             print(f"  [{i:02d}/{len(dataset)}] {label}...")
@@ -525,11 +525,11 @@ def main():
             })
         save_checkpoint(1, rows, fingerprint)
     else:
-        print(f"Phase 1/3 — skipped (loaded {len(rows)} P2 answers from checkpoint).")
+        print(f"Phase 1/3 - skipped (loaded {len(rows)} P2 answers from checkpoint).")
 
     # ── Phase 2: LLM-as-judge ───────────────────────────────────────────────
     if done_phase < 2:
-        print(f"\nPhase 2/3 — LLM-as-judge ({len(rows)} rows) using {CFG['judge_model']}...")
+        print(f"\nPhase 2/3 - LLM-as-judge ({len(rows)} rows) using {CFG['judge_model']}...")
         judge_client = _make_judge_client()
         for i, r in enumerate(rows, 1):
             print(f"  [{i:02d}/{len(rows)}] judging...")
@@ -547,11 +547,11 @@ def main():
             )
         save_checkpoint(2, rows, fingerprint)
     else:
-        print(f"Phase 2/3 — skipped (judge scores loaded from checkpoint).")
+        print(f"Phase 2/3 - skipped (judge scores loaded from checkpoint).")
 
     # ── Phase 3: RAGAS (answerable rows only) ───────────────────────────────
     answerable = [r for r in rows if r["answerable"] and r["answer"] != "ERROR"]
-    print(f"\nPhase 3/3 — RAGAS on {len(answerable)} answerable rows (calls NVIDIA API — be patient)...")
+    print(f"\nPhase 3/3 - RAGAS on {len(answerable)} answerable rows (calls NVIDIA API - be patient)...")
     ragas_df = run_ragas(answerable)
 
     for i, r in enumerate(answerable):
@@ -615,7 +615,7 @@ def main():
     print(tabulate(worst_rows, headers=["ID", "Question", "Score", "Root cause"], tablefmt="simple"))
 
     print("\n" + ("=" * 62))
-    verdict = "OVERALL: PASS — ready to ship" if overall_pass else "OVERALL: FAIL — fix failures before shipping"
+    verdict = "OVERALL: PASS - ready to ship" if overall_pass else "OVERALL: FAIL - fix failures before shipping"
     print(verdict)
     print("=" * 62)
 
@@ -639,11 +639,11 @@ def main():
         json.dump(report, f, indent=2)
     print(f"\nFull report: {report_path}")
 
-    # Clean up checkpoint — run completed successfully
+    # Clean up checkpoint - run completed successfully
     CHECKPOINT.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
     if not NVIDIA_API_KEY:
-        sys.exit("ERROR: NVIDIA_API_KEY not set — add it to p3-rag-eval/.env")
+        sys.exit("ERROR: NVIDIA_API_KEY not set - add it to p3-rag-eval/.env")
     main()

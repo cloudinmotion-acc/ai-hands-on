@@ -1,9 +1,9 @@
 """
-Output guard — runs on the P5 agent's final answer before it reaches the user.
+Output guard - runs on the P5 agent's final answer before it reaches the user.
 
 Two checks in one LLM call (to keep latency low):
-  1. Hallucination — does the answer claim things not supported by the search results?
-  2. Tone          — is the response appropriate for a retail shopping chatbot?
+  1. Hallucination - does the answer claim things not supported by the search results?
+  2. Tone          - is the response appropriate for a retail shopping chatbot?
 
 If either check fails → action="rewrite", modified_text has the fixed version.
 The original answer is never sent to the user in that case.
@@ -30,11 +30,11 @@ You will receive:
 
 Check for TWO things:
 
-1. HALLUCINATION — does the answer make specific claims about products
+1. HALLUCINATION - does the answer make specific claims about products
    (prices, availability, fabrics, sizes) that contradict the search results?
    Minor phrasing differences are fine. Only flag factual contradictions.
 
-2. TONE — is the answer appropriate? Flag if it is rude, dismissive,
+2. TONE - is the answer appropriate? Flag if it is rude, dismissive,
    excessively apologetic (saying sorry 3+ times), or completely ignores
    what the user asked.
 

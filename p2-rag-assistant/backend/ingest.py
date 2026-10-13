@@ -88,7 +88,7 @@ def _purge_source(source: str) -> int:
     Remove every chunk previously stored for this document.
 
     Without this, re-uploading a file appends a second copy of every chunk, and
-    retrieval then returns the same passage several times — which caps
+    retrieval then returns the same passage several times - which caps
     context_precision no matter how good the retriever is.
     """
     engine = create_engine(get_postgres_url())

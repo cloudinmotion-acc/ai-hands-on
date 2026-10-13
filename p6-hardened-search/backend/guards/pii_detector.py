@@ -1,8 +1,8 @@
 """
-PII detector — LLM primary, regex fallback.
+PII detector - LLM primary, regex fallback.
 
 Action is always "rewrite" (never block) so the search still works.
-The original text is never forwarded — only the scrubbed version is.
+The original text is never forwarded - only the scrubbed version is.
 The reason field records what was found and which path ran, for LangSmith.
 """
 

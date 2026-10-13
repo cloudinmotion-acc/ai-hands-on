@@ -1,0 +1,15 @@
+{
+  "stage": "scoping",
+  "items": [
+    "Identifies primary user types or personas",
+    "Lists at least three in-scope features or capabilities",
+    "States at least one explicitly out-of-scope item",
+    "Identifies at least one technical or business risk",
+    "Defines success criteria or acceptance conditions",
+    "Mentions data requirements or key data sources",
+    "Addresses regulatory, compliance, or security considerations",
+    "Sets timeline, phase, or priority expectations",
+    "Identifies integration points with external systems or existing infrastructure",
+    "Specifies performance expectations, user scale, or throughput targets"
+  ]
+}

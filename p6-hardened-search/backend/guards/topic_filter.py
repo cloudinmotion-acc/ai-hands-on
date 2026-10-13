@@ -1,10 +1,10 @@
 """
-Topic filter — checks if the query is relevant to clothing/fashion/shopping.
+Topic filter - checks if the query is relevant to clothing/fashion/shopping.
 
 Fast path: obvious shopping keywords → allow immediately (no LLM cost).
 LLM path: for anything ambiguous.
 
-Greetings and meta-questions ("what can you help with?") are allowed —
+Greetings and meta-questions ("what can you help with?") are allowed  - 
 they're harmless and the P5 agent handles them gracefully.
 """
 
@@ -22,7 +22,7 @@ from .types import GuardResult
 load_dotenv()
 
 # ── fast-path keywords ────────────────────────────────────────────────
-# Any query containing these is obviously on-topic — skip the LLM call.
+# Any query containing these is obviously on-topic - skip the LLM call.
 _SHOPPING_KEYWORDS = {
     "dress", "shirt", "pants", "jeans", "jacket", "kurta", "saree", "lehenga",
     "top", "skirt", "blouse", "hoodie", "shorts", "suit", "coat", "shoes",

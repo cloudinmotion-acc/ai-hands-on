@@ -1,4 +1,4 @@
-# P1 — Invoice AI
+# P1 - Invoice AI
 
 Structured data extraction from invoice images and PDFs using an LLM, with a self-verification pass that flags low-confidence fields.
 
@@ -21,6 +21,7 @@ cp .env.example .env        # fill in NVIDIA_API_KEY
 ```
 
 **.env**
+
 ```
 NVIDIA_API_KEY=nvapi-your-key-here
 NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
@@ -33,7 +34,7 @@ NVIDIA_MODEL=nvidia/nemotron-3-super
 streamlit run app.py
 ```
 
-Open `http://localhost:8501` — drag and drop an invoice to get started.
+Open `http://localhost:8501` - drag and drop an invoice to get started.
 
 ## Project structure
 

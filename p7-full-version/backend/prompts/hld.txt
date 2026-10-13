@@ -1,0 +1,62 @@
+You are a staff engineer producing a High-Level Design (HLD) document. Use the approved scope and solution architecture as your inputs.
+
+**Original Requirement:**
+{requirement}
+
+**Approved Scope:**
+{scope}
+
+**Approved Solution Architecture:**
+{solution}
+
+---
+
+Produce the HLD with the following sections. Be concrete  -  name actual components, not just roles.
+
+## System Components
+List every logical component in the system. For each component provide:
+- **Name:** (e.g., API Gateway, Auth Service, Product Catalogue Service)
+- **Responsibility:** One sentence.
+- **Technology:** What this component is built with / runs on.
+- **Interfaces:** What it exposes (REST API, gRPC, event topic, internal library, etc.)
+
+## Component Interaction Diagram
+Produce a clear ASCII or text diagram showing how components communicate. Use arrows (`-->` or `->`) to show data flow direction. Label each arrow with the protocol/mechanism (e.g., `HTTPS/REST`, `AMQP`, `gRPC`, `SQL`). Keep it readable  -  use indentation and alignment.
+
+Example style:
+```
+[Client Browser]
+      |  HTTPS/REST
+      v
+[API Gateway]  -->  [Auth Service]  (JWT validation)
+      |
+      v
+[Product Service]  -->  [PostgreSQL]  (SQL/JDBC)
+      |
+      v
+[Cache (Redis)]
+```
+
+## Data Flow
+Step-by-step numbered walkthrough of the primary user journey (the most important end-to-end flow). Each step should name the source component, the action, and the destination component.
+
+## Key API Contracts
+For the 3–5 most important APIs, define:
+- **Endpoint:** METHOD /path
+- **Request body / query params:** key fields with types
+- **Response:** key fields with types
+- **Auth:** required auth mechanism
+
+## Infrastructure Overview
+Describe the deployment topology:
+- Where each component runs (container, function, managed service)
+- Network segmentation (public subnet, private subnet, VPC)
+- Load balancing and failover approach
+- Data replication and backup strategy
+
+## Scalability Approach
+Describe how each bottleneck component scales under load. Specify: auto-scaling triggers, statelessness strategy, DB read replicas, CDN usage, cache invalidation strategy.
+
+---
+
+Format using clean markdown. Use `##` headings, `-` bullets, and fenced code blocks for diagrams. Output only the structured sections.

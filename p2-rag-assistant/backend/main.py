@@ -46,7 +46,7 @@ async def ingest(file: UploadFile = File(...)):
     try:
         with os.fdopen(fd, "wb") as f:
             shutil.copyfileobj(file.file, f)
-        # fd is now fully closed — no lock held when ingest_file opens it
+        # fd is now fully closed - no lock held when ingest_file opens it
         count = ingest_file(tmp_path, original_name=file.filename)
     except Exception:
         if os.path.exists(tmp_path):
@@ -77,7 +77,7 @@ async def list_sources():
 
 @app.delete("/sources")
 async def clear_sources():
-    """Delete all embeddings from pgvector. Destructive — use for demo resets."""
+    """Delete all embeddings from pgvector. Destructive - use for demo resets."""
     engine = create_engine(get_postgres_url())
     with engine.begin() as conn:
         result = conn.execute(sql_text("DELETE FROM langchain_pg_embedding"))

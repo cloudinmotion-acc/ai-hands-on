@@ -18,12 +18,19 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: "Product Search · P5",
-  description: "Hybrid RAG product search — SQL + BM25 + pgvector + MCP",
+  description: "Hybrid RAG product search  -  SQL + BM25 + pgvector + MCP",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={`${spectral.variable} ${manrope.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${spectral.variable} ${manrope.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

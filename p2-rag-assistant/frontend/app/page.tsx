@@ -21,12 +21,14 @@ export default function Page() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [clearing, setClearing] = useState<"idle" | "confirm" | "working">("idle");
+  const [clearing, setClearing] = useState<"idle" | "confirm" | "working">(
+    "idle",
+  );
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   async function handleClear() {
     if (clearing === "idle") {
-      // First click — arm the button. Auto-disarm after 3 s if not confirmed.
+      // First click - arm the button. Auto-disarm after 3 s if not confirmed.
       setClearing("confirm");
       clearTimerRef.current = setTimeout(() => setClearing("idle"), 3000);
       return;
@@ -53,7 +55,7 @@ export default function Page() {
             data.sources.map((s: { name: string; chunks: number }) => ({
               name: s.name,
               chunks: s.chunks,
-            }))
+            })),
           );
         }
       })
@@ -89,7 +91,10 @@ export default function Page() {
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (e: unknown) {
       let msg = e instanceof Error ? e.message : "Request failed";
-      try { const p = JSON.parse(msg); if (p.detail) msg = p.detail; } catch {}
+      try {
+        const p = JSON.parse(msg);
+        if (p.detail) msg = p.detail;
+      } catch {}
       setError(msg);
       setMessages((prev) => prev.slice(0, -1));
     } finally {
@@ -146,7 +151,7 @@ export default function Page() {
           </span>
           <span className="text-xs text-muted-foreground">· Classic RAG</span>
         </div>
-    
+
         {/* Uploaded file chips */}
         <div className="flex-1 flex items-center gap-2 overflow-x-auto min-w-0">
           {uploadedFiles.map((f, i) => (
@@ -154,9 +159,28 @@ export default function Page() {
               key={i}
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-primary/10 text-primary shrink-0"
             >
-              <svg width="10" height="11" viewBox="0 0 10 11" fill="none" className="opacity-80">
-                <rect x="1.5" y="1" width="7" height="9" rx="1" stroke="currentColor" strokeWidth="1"/>
-                <path d="M3 4h4M3 6h4M3 8h2" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round"/>
+              <svg
+                width="10"
+                height="11"
+                viewBox="0 0 10 11"
+                fill="none"
+                className="opacity-80"
+              >
+                <rect
+                  x="1.5"
+                  y="1"
+                  width="7"
+                  height="9"
+                  rx="1"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                />
+                <path
+                  d="M3 4h4M3 6h4M3 8h2"
+                  stroke="currentColor"
+                  strokeWidth="0.8"
+                  strokeLinecap="round"
+                />
               </svg>
               <span className="truncate max-w-[120px]">{f.name}</span>
               <span className="opacity-50">·{f.chunks}ch</span>
@@ -164,7 +188,7 @@ export default function Page() {
           ))}
         </div>
 
-        {/* Clear knowledge base — only shown when files are indexed */}
+        {/* Clear knowledge base - only shown when files are indexed */}
         {uploadedFiles.length > 0 && (
           <button
             onClick={handleClear}
@@ -183,7 +207,11 @@ export default function Page() {
             ) : (
               <Trash2 className="w-3 h-3" />
             )}
-            {clearing === "confirm" ? "Confirm clear?" : clearing === "working" ? "Clearing…" : "Clear KB"}
+            {clearing === "confirm"
+              ? "Confirm clear?"
+              : clearing === "working"
+                ? "Clearing…"
+                : "Clear KB"}
           </button>
         )}
 
@@ -235,16 +263,42 @@ export default function Page() {
             <div className="min-h-full flex flex-col items-center justify-center px-5 py-8">
               {/* Heading */}
               <div className="flex flex-col items-center gap-3 text-center mb-7">
-                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" className="text-primary/40">
-                  <rect x="8" y="4" width="24" height="36" rx="3" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M14 14h16M14 20h16M14 26h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                  <path d="M26 4v9h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 44 44"
+                  fill="none"
+                  className="text-primary/40"
+                >
+                  <rect
+                    x="8"
+                    y="4"
+                    width="24"
+                    height="36"
+                    rx="3"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M14 14h16M14 20h16M14 26h10"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M26 4v9h6"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
                 <h1 className="font-heading text-2xl font-semibold text-foreground tracking-tight">
                   Chat With Your Document
                 </h1>
                 <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
-                  Upload one or more documents, then ask questions to get cited answers.
+                  Upload one or more documents, then ask questions to get cited
+                  answers.
                 </p>
               </div>
 
@@ -254,10 +308,8 @@ export default function Page() {
                 onFilesChange={setUploadedFiles}
               />
 
-              {/* Input bar — directly below upload zone */}
-              <div className="w-full max-w-sm mt-5">
-                {inputBar}
-              </div>
+              {/* Input bar - directly below upload zone */}
+              <div className="w-full max-w-sm mt-5">{inputBar}</div>
             </div>
           </div>
         )}

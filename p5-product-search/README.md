@@ -1,4 +1,4 @@
-# P5 — Hybrid Product Search
+# P5 - Hybrid Product Search
 
 Three-retriever search pipeline (SQL + BM25 + pgvector) fused with RRF, exposed as an MCP tool, driven by a LangGraph agent, with mismatch highlighting in the UI.
 
@@ -9,11 +9,11 @@ User query → LLM decomposer splits it into structured filters + semantic text 
 ## Stack
 
 - FastAPI backend + Next.js frontend (port 3001)
-- pgvector (PostgreSQL) — product embeddings
-- BM25 (`rank_bm25`) — in-memory keyword index
-- NVIDIA NIM — embeddings (`nv-embedqa-e5-v5`, 2048-dim) + LLM (`nemotron-3-super-120b-a12b`)
-- FastMCP — wraps pipeline as a single tool
-- LangGraph — ReAct agent with 4-attempt backoff
+- pgvector (PostgreSQL) - product embeddings
+- BM25 (`rank_bm25`) - in-memory keyword index
+- NVIDIA NIM - embeddings (`nv-embedqa-e5-v5`, 2048-dim) + LLM (`nemotron-3-super-120b-a12b`)
+- FastMCP - wraps pipeline as a single tool
+- LangGraph - ReAct agent with 4-attempt backoff
 
 ## Prerequisites
 
@@ -43,6 +43,7 @@ npm install
 ```
 
 **backend/.env**
+
 ```
 NVIDIA_API_KEY=nvapi-your-key-here
 NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
@@ -68,10 +69,10 @@ python ingest/ingest.py
 ## Run
 
 ```bash
-# Terminal 1 — backend (from backend/)
+# Terminal 1 - backend (from backend/)
 uvicorn main:app --port 8000
 
-# Terminal 2 — frontend (from frontend/)
+# Terminal 2 - frontend (from frontend/)
 npm run dev          # starts on port 3001
 ```
 

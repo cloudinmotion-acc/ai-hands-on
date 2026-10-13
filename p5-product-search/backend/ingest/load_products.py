@@ -1,5 +1,5 @@
 """
-P5 Ingest — products.xlsx → Postgres (structured) + pgvector (embeddings)
+P5 Ingest  -  products.xlsx → Postgres (structured) + pgvector (embeddings)
 
 What this does:
   1. Connects to Postgres, enables pgvector extension

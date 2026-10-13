@@ -1,0 +1,15 @@
+{
+  "stage": "lld",
+  "items": [
+    "Provides at least one database schema or table definition with column names and types",
+    "Defines at least one API endpoint with HTTP method, path, and request/response shape",
+    "Specifies data types or field constraints for key entities",
+    "Addresses indexing strategy or query optimization for critical access patterns",
+    "Includes error response definitions or HTTP error codes",
+    "Defines at least one data validation rule or input constraint",
+    "Specifies relationship constraints, foreign keys, or referential integrity if relational database",
+    "Addresses pagination, filtering, or sorting for list endpoints",
+    "Defines enum values, status codes, or state machine transitions used in the system",
+    "Includes at least one sequence diagram, processing flow, or step-by-step algorithm description"
+  ]
+}

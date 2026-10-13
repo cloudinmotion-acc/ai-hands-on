@@ -88,7 +88,7 @@ export function SettingsPanel({ settings, onChange }: Props) {
           </Select>
         </Row>
 
-        <Row label={`Top-K chunks — ${settings.top_k_chunks}`}>
+        <Row label={`Top-K chunks - ${settings.top_k_chunks}`}>
           <Slider
             min={1}
             max={10}
@@ -106,7 +106,7 @@ export function SettingsPanel({ settings, onChange }: Props) {
           LLM Parameters
         </h3>
 
-        <Row label={`Temperature — ${p.temperature}`}>
+        <Row label={`Temperature - ${p.temperature}`}>
           <Slider
             min={0}
             max={2}
@@ -116,7 +116,7 @@ export function SettingsPanel({ settings, onChange }: Props) {
           />
         </Row>
 
-        <Row label={`Top-P — ${p.top_p}`}>
+        <Row label={`Top-P - ${p.top_p}`}>
           <Slider
             min={0}
             max={1}
@@ -126,7 +126,7 @@ export function SettingsPanel({ settings, onChange }: Props) {
           />
         </Row>
 
-        <Row label={`Top-K — ${p.top_k}`}>
+        <Row label={`Top-K - ${p.top_k}`}>
           <Slider
             min={1}
             max={200}
@@ -136,7 +136,7 @@ export function SettingsPanel({ settings, onChange }: Props) {
           />
         </Row>
 
-        <Row label={`Freq penalty — ${p.frequency_penalty}`}>
+        <Row label={`Freq penalty - ${p.frequency_penalty}`}>
           <Slider
             min={0}
             max={2}
@@ -146,7 +146,7 @@ export function SettingsPanel({ settings, onChange }: Props) {
           />
         </Row>
 
-        <Row label={`Max tokens — ${p.max_tokens}`}>
+        <Row label={`Max tokens - ${p.max_tokens}`}>
           <Slider
             min={256}
             max={16384}

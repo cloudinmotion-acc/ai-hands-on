@@ -1,0 +1,97 @@
+You are a senior engineer producing a Low-Level Design (LLD) document. The scope and solution summaries below are abbreviated for brevity; the full High-Level Design is provided.
+
+**Original Requirement:**
+{requirement}
+
+**Scope Summary (abbreviated):**
+{scope_summary}
+
+**Solution Summary (abbreviated):**
+{solution_summary}
+
+**Full High-Level Design:**
+{hld}
+
+---
+
+Produce the LLD with the following sections. Be implementation-ready  -  a developer should be able to build directly from this document.
+
+## Database Schema
+For each data entity, provide the full table/collection definition:
+- **Table name** and engine/collection type
+- Column definitions: name, data type, constraints (PK, FK, NOT NULL, UNIQUE, DEFAULT)
+- Index definitions: column(s), type (B-tree, hash, GIN), purpose
+- Relationships (FK references, cascade rules)
+
+Use markdown tables or SQL DDL  -  whichever is clearer.
+
+## API Specifications
+For every API endpoint in the system, provide a complete specification:
+- **Method + Path**
+- **Auth:** (e.g., Bearer JWT, API Key, None)
+- **Request Headers** (if non-standard)
+- **Request Body** (JSON schema or field list with types/constraints)
+- **Query Parameters** (name, type, required/optional, description)
+- **Success Response** (status code + JSON structure)
+- **Error Responses** (status codes + error body shape)
+- **Rate Limit** (if applicable)
+
+## Sequence Diagrams
+Provide text-based sequence diagrams (using arrow notation) for the 2–3 most complex or critical user flows. Each diagram must show:
+- Actor / initiator
+- Each service hop with the call name and payload summary
+- Return values and timing notes
+- Error / exception paths
+
+Example format:
+```
+Client -> API Gateway: POST /orders {items, userId}
+API Gateway -> Auth Service: validateToken(JWT)
+Auth Service --> API Gateway: {userId, roles}
+API Gateway -> Order Service: createOrder(userId, items)
+Order Service -> Inventory Service: reserveItems(items)
+Inventory Service --> Order Service: {reservationId}
+Order Service -> DB: INSERT orders, order_items
+Order Service --> API Gateway: {orderId, status: "confirmed"}
+API Gateway --> Client: 201 {orderId}
+
+[Error path  -  item out of stock]
+Inventory Service --> Order Service: 409 {code: "OUT_OF_STOCK", itemId}
+Order Service --> API Gateway: 409 {error: "Item unavailable"}
+API Gateway --> Client: 409 {error: "Item unavailable"}
+```
+
+## Error Handling Strategy
+Describe the system-wide error handling approach:
+- Error classification (validation, business logic, infrastructure, unexpected)
+- HTTP status codes used and their semantics
+- Error response envelope (JSON structure every error follows)
+- Retry policy: which operations are retried, max attempts, backoff strategy
+- Dead-letter handling for async operations
+- Circuit breaker thresholds (if applicable)
+- Alerting / on-call trigger conditions
+
+## Caching Strategy
+For each cache layer in the system:
+- **What is cached:** (entity name, query result, session, etc.)
+- **Cache key scheme:** exact format
+- **TTL:** value and rationale
+- **Invalidation trigger:** event or write operation that invalidates the key
+- **Cache miss behaviour:** what happens when key is absent
+- **Cache technology and client library used**
+
+## Security Controls
+Enumerate every security control in the implementation:
+- **Authentication:** mechanism (JWT, OAuth2, session cookie), token lifetime, refresh strategy
+- **Authorisation:** model (RBAC, ABAC, ACL), how permissions are enforced per endpoint
+- **Input Validation:** library/approach, validation rules for key inputs
+- **SQL / NoSQL Injection Prevention:** parameterised queries, ORM safeguards
+- **XSS Prevention:** output encoding, Content Security Policy header
+- **CSRF Prevention:** method (SameSite cookie, CSRF token)
+- **Secrets Management:** how API keys and credentials are stored and rotated
+- **Data Encryption:** at rest (algorithm, key management) and in transit (TLS version, cipher suites)
+- **Audit Logging:** what events are logged, log format, retention policy
+
+---
+
+Format using clean markdown. Use `##` headings, `-` bullets, markdown tables, and fenced code blocks for schemas and diagrams. Output only the structured sections.

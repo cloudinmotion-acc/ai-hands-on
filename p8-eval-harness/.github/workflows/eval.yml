@@ -1,0 +1,69 @@
+name: P8 Eval Harness
+
+on:
+  push:
+    paths:
+      - "p7-full-version/**"
+      - "p8-eval-harness/**"
+  workflow_dispatch:
+    inputs:
+      quick:
+        description: "Quick mode (3 scenarios)"
+        required: false
+        default: "true"
+
+jobs:
+  eval:
+    name: Run evaluation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install P7 backend deps
+        run: pip install -r p7-full-version/backend/requirements.txt
+
+      - name: Install P8 eval deps
+        run: pip install -r p8-eval-harness/backend/requirements.txt
+
+      - name: Start P7 backend
+        working-directory: p7-full-version/backend
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          AGENT_MODEL: nvidia/nemotron-3-super-120b-a12b
+          NVIDIA_BASE_URL: https://integrate.api.nvidia.com/v1
+        run: |
+          uvicorn main:app --port 8000 &
+          sleep 10
+          curl --fail http://localhost:8000/health
+
+      - name: Run eval (quick mode for CI)
+        working-directory: p8-eval-harness/backend
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          JUDGE_MODEL: nvidia/nemotron-3-super-120b-a12b
+          NVIDIA_BASE_URL: https://integrate.api.nvidia.com/v1
+          P7_URL: http://localhost:8000
+          RESULTS_DIR: ../results
+        run: |
+          python run_eval.py --quick --skip-propagation
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results
+          path: p8-eval-harness/results/
+
+      - name: Check verdict
+        run: |
+          VERDICT=$(python -c "import json; d=json.load(open('p8-eval-harness/results/latest.json')); print(d['verdict'])")
+          echo "Verdict: $VERDICT"
+          [ "$VERDICT" = "GO" ] || exit 1

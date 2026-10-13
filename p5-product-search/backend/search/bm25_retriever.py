@@ -4,7 +4,7 @@ BM25 keyword retriever for P5.
 Loads all product descriptions from Postgres at import time, builds a BM25
 index, and exposes a search() function for keyword queries.
 
-BM25 is great for exact/near-exact matches that embeddings miss — product
+BM25 is great for exact/near-exact matches that embeddings miss  -  product
 names, colour words, fabric types, size tokens.
 """
 
@@ -52,7 +52,7 @@ def _load_products() -> tuple[list[dict], BM25Okapi]:
     return products, index
 
 
-# Index is built once at module import — stays in memory for the process lifetime.
+# Index is built once at module import  -  stays in memory for the process lifetime.
 _PRODUCTS, _INDEX = _load_products()
 
 

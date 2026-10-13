@@ -4,7 +4,7 @@ pgvector cosine-similarity retriever for P5.
 Embeds the query with NVIDIA NIM, then does a nearest-neighbour search
 against the `embedding` column in the `products` table.
 
-This is the semantic leg of the hybrid pipeline — it finds products that
+This is the semantic leg of the hybrid pipeline  -  it finds products that
 *mean* the same thing even when keywords don't match exactly (e.g. "warm
 winter jacket" → finds "padded fleece coat").
 """

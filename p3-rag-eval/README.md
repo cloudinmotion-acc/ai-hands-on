@@ -1,4 +1,4 @@
-# P3 — RAG Quality Gate
+# P3 - RAG Quality Gate
 
 Automated evaluation of P2's retrieval and answer quality using RAGAS metrics + an LLM-as-judge. Replaces "it looks good" with reproducible numbers and PASS/FAIL thresholds.
 
@@ -15,11 +15,12 @@ Automated evaluation of P2's retrieval and answer quality using RAGAS metrics + 
 - Python CLI (`run_eval.py`) + Streamlit dashboard (`dashboard.py`)
 - RAGAS 0.4.3 for automated metrics
 - NVIDIA NIM for generator + judge LLM
-- No database of its own — calls P2 over HTTP
+- No database of its own - calls P2 over HTTP
 
 ## Prerequisites
 
 **P2 must be running** with all 4 test documents ingested:
+
 - `product_manual.txt`
 - `company_policy.pdf`
 - `annual_report.pdf`
@@ -36,6 +37,7 @@ cp .env.example .env        # fill in NVIDIA_API_KEY
 ```
 
 **.env**
+
 ```
 NVIDIA_API_KEY=nvapi-your-key-here
 P2_BASE_URL=http://localhost:8000
@@ -56,7 +58,7 @@ Dashboard opens at `http://localhost:8501`.
 ## Release thresholds
 
 | Metric | Threshold |
-|--------|-----------|
+| -------- | ----------- |
 | Context precision | ≥ 0.70 |
 | Context recall | ≥ 0.60 |
 | Faithfulness | ≥ 0.80 |

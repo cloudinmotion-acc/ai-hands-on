@@ -1,0 +1,15 @@
+{
+  "stage": "hld",
+  "items": [
+    "Identifies the major system components or services with their responsibilities",
+    "Describes data flow between components or services",
+    "Includes at least one interface or API contract description between components",
+    "Identifies external integrations or third-party services used",
+    "Addresses scalability approach (horizontal scaling, load balancing, sharding, etc.)",
+    "Describes the database schema structure, major entities, or collections at a high level",
+    "Describes event or message flow if asynchronous patterns are used",
+    "Identifies failure modes, fallback mechanisms, or resilience strategies",
+    "Mentions security boundaries, authentication flow between services, or trust model",
+    "Addresses monitoring, logging, or distributed tracing architecture"
+  ]
+}

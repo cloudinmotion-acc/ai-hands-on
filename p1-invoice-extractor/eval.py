@@ -48,7 +48,7 @@ def _call_llm(images: list[str], prompt: str, retries: int = 3) -> str:
             if attempt == retries - 1:
                 raise
             wait = 2 ** attempt
-            print(f"      [retry {attempt+1}] {e} — waiting {wait}s")
+            print(f"      [retry {attempt+1}] {e} - waiting {wait}s")
             time.sleep(wait)
     raise RuntimeError("All retries exhausted")
 
@@ -100,7 +100,7 @@ def _field_matches(field: str, predicted, expected) -> bool:
         e = str(expected).strip().lower()
         return e in p or p in e
 
-    # String comparison — case-insensitive, stripped
+    # String comparison - case-insensitive, stripped
     return str(predicted).strip().lower() == str(expected).strip().lower()
 
 
@@ -116,7 +116,7 @@ def run_eval():
     # Sort ground truths by source_page so they match page order
     ground_truths_by_page = {gt["source_page"]: gt for gt in ground_truths}
 
-    # Each page in the PDF is one invoice — load as individual page images
+    # Each page in the PDF is one invoice - load as individual page images
     all_images = file_to_images(str(INVOICE_PATH))
     print(f"Loaded {len(all_images)} pages from PDF\n")
 

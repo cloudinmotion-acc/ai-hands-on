@@ -1,117 +1,132 @@
-"use client"
+"use client";
 
-import { useRef, useState, DragEvent } from "react"
-import { ingestFile } from "@/lib/api"
-import { Check, X, Upload, Plus, Minus } from "lucide-react"
+import { useRef, useState, DragEvent } from "react";
+import { ingestFile } from "@/lib/api";
+import { Check, X, Upload, Plus, Minus } from "lucide-react";
 
-type UploadedFile = { name: string; chunks: number }
+type UploadedFile = { name: string; chunks: number };
 
 type Props = {
-  compact?: boolean
-  uploadedFiles: UploadedFile[]
-  onFilesChange: (files: UploadedFile[]) => void
-}
+  compact?: boolean;
+  uploadedFiles: UploadedFile[];
+  onFilesChange: (files: UploadedFile[]) => void;
+};
 
 type QueueItem = {
-  name: string
-  status: "pending" | "uploading" | "done" | "error" | "skipped"
-  chunks?: number
-  error?: string
-}
+  name: string;
+  status: "pending" | "uploading" | "done" | "error" | "skipped";
+  chunks?: number;
+  error?: string;
+};
 
-const ACCEPT = ".pdf,.xlsx,.xls,.txt"
-const ALLOWED = [".pdf", ".xlsx", ".xls", ".txt"]
+const ACCEPT = ".pdf,.xlsx,.xls,.txt";
+const ALLOWED = [".pdf", ".xlsx", ".xls", ".txt"];
 
 function extOf(name: string) {
-  const i = name.lastIndexOf(".")
-  return i === -1 ? "" : name.slice(i).toLowerCase()
+  const i = name.lastIndexOf(".");
+  return i === -1 ? "" : name.slice(i).toLowerCase();
 }
 
-export function FileUpload({ compact = false, uploadedFiles, onFilesChange }: Props) {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [dragging, setDragging] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [queue, setQueue] = useState<QueueItem[]>([])
+export function FileUpload({
+  compact = false,
+  uploadedFiles,
+  onFilesChange,
+}: Props) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [queue, setQueue] = useState<QueueItem[]>([]);
 
   async function uploadAll(files: File[]) {
-    if (!files.length || uploading) return
+    if (!files.length || uploading) return;
 
-    // Reject unsupported types up front — the backend would 400 anyway, and
+    // Reject unsupported types up front - the backend would 400 anyway, and
     // catching it here keeps a stray file from interrupting the batch.
     const items: QueueItem[] = files.map((f) =>
       ALLOWED.includes(extOf(f.name))
         ? { name: f.name, status: "pending" }
-        : { name: f.name, status: "error", error: "Unsupported file type" }
-    )
-    setQueue(items)
-    setUploading(true)
+        : { name: f.name, status: "error", error: "Unsupported file type" },
+    );
+    setQueue(items);
+    setUploading(true);
 
     // Accumulate locally: onFilesChange is called once per file, so reading
     // `uploadedFiles` from the closure would go stale after the first append.
-    const accepted = [...uploadedFiles]
+    const accepted = [...uploadedFiles];
 
     for (let i = 0; i < files.length; i++) {
-      if (items[i].status === "error") continue
+      if (items[i].status === "error") continue;
 
       // If the DB already has this file, skip the embed round-trip entirely.
       // Re-embedding the same file produces identical rows (content-addressed IDs),
-      // so there is no benefit — just wasted NVIDIA token spend.
-      const alreadyIndexed = accepted.find((f) => f.name === files[i].name)
+      // so there is no benefit - just wasted NVIDIA token spend.
+      const alreadyIndexed = accepted.find((f) => f.name === files[i].name);
       if (alreadyIndexed) {
         setQueue((q) =>
           q.map((it, j) =>
-            j === i ? { ...it, status: "skipped", chunks: alreadyIndexed.chunks } : it
-          )
-        )
-        continue
+            j === i
+              ? { ...it, status: "skipped", chunks: alreadyIndexed.chunks }
+              : it,
+          ),
+        );
+        continue;
       }
 
-      setQueue((q) => q.map((it, j) => (j === i ? { ...it, status: "uploading" } : it)))
+      setQueue((q) =>
+        q.map((it, j) => (j === i ? { ...it, status: "uploading" } : it)),
+      );
 
       try {
-        const data = await ingestFile(files[i])
-        const chunks = data.chunks_stored ?? 0
-        accepted.push({ name: files[i].name, chunks })
-        onFilesChange([...accepted])
+        const data = await ingestFile(files[i]);
+        const chunks = data.chunks_stored ?? 0;
+        accepted.push({ name: files[i].name, chunks });
+        onFilesChange([...accepted]);
         setQueue((q) =>
-          q.map((it, j) => (j === i ? { ...it, status: "done", chunks } : it))
-        )
+          q.map((it, j) => (j === i ? { ...it, status: "done", chunks } : it)),
+        );
       } catch (e: unknown) {
         // One bad file must not abort the rest of the batch.
-        let msg = e instanceof Error ? e.message : "Upload failed"
+        let msg = e instanceof Error ? e.message : "Upload failed";
         try {
-          const p = JSON.parse(msg)
-          if (p.detail) msg = p.detail
+          const p = JSON.parse(msg);
+          if (p.detail) msg = p.detail;
         } catch {}
-        setQueue((q) => q.map((it, j) => (j === i ? { ...it, status: "error", error: msg } : it)))
+        setQueue((q) =>
+          q.map((it, j) =>
+            j === i ? { ...it, status: "error", error: msg } : it,
+          ),
+        );
       }
     }
 
-    setUploading(false)
+    setUploading(false);
   }
 
   function onDrop(e: DragEvent<HTMLDivElement>) {
-    e.preventDefault()
-    setDragging(false)
-    uploadAll(Array.from(e.dataTransfer.files))
+    e.preventDefault();
+    setDragging(false);
+    uploadAll(Array.from(e.dataTransfer.files));
   }
 
   function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    uploadAll(Array.from(e.target.files ?? []))
-    e.target.value = ""
+    uploadAll(Array.from(e.target.files ?? []));
+    e.target.value = "";
   }
 
-  const failed = queue.filter((q) => q.status === "error")
-  const doneCount = queue.filter((q) => q.status === "done").length
-  const activeIndex = queue.findIndex((q) => q.status === "uploading")
+  const failed = queue.filter((q) => q.status === "error");
+  const doneCount = queue.filter((q) => q.status === "done").length;
+  const activeIndex = queue.findIndex((q) => q.status === "uploading");
 
   // Unsupported types and already-indexed files are not part of the "X of Y"
-  // progress — counting them would make the denominator disagree with position.
+  // progress - counting them would make the denominator disagree with position.
   const isSkipped = (it: QueueItem) =>
-    it.status === "skipped" || (it.status === "error" && it.error === "Unsupported file type")
-  const uploadable = queue.filter((it) => !isSkipped(it))
+    it.status === "skipped" ||
+    (it.status === "error" && it.error === "Unsupported file type");
+  const uploadable = queue.filter((it) => !isSkipped(it));
   const currentPos =
-    activeIndex < 0 ? 0 : queue.slice(0, activeIndex + 1).filter((it) => !isSkipped(it)).length
+    activeIndex < 0
+      ? 0
+      : queue.slice(0, activeIndex + 1).filter((it) => !isSkipped(it)).length;
 
   const fileInput = (
     <input
@@ -122,7 +137,7 @@ export function FileUpload({ compact = false, uploadedFiles, onFilesChange }: Pr
       className="hidden"
       onChange={onInputChange}
     />
-  )
+  );
 
   // ── Compact: shown under the chat thread ──
   if (compact) {
@@ -138,7 +153,9 @@ export function FileUpload({ compact = false, uploadedFiles, onFilesChange }: Pr
           ) : (
             <Plus className="w-3 h-3" />
           )}
-          {uploading ? `Uploading ${currentPos} of ${uploadable.length}…` : "Add files"}
+          {uploading
+            ? `Uploading ${currentPos} of ${uploadable.length}…`
+            : "Add files"}
         </button>
 
         {uploading && activeIndex >= 0 && (
@@ -155,7 +172,7 @@ export function FileUpload({ compact = false, uploadedFiles, onFilesChange }: Pr
 
         {fileInput}
       </div>
-    )
+    );
   }
 
   // ── Full: empty-state dropzone ──
@@ -163,8 +180,8 @@ export function FileUpload({ compact = false, uploadedFiles, onFilesChange }: Pr
     <div className="w-full max-w-sm">
       <div
         onDragOver={(e) => {
-          e.preventDefault()
-          setDragging(true)
+          e.preventDefault();
+          setDragging(true);
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
@@ -206,15 +223,24 @@ export function FileUpload({ compact = false, uploadedFiles, onFilesChange }: Pr
         )}
       </div>
 
-      {/* Per-file results — kept visible after the batch so failures are readable */}
+      {/* Per-file results - kept visible after the batch so failures are readable */}
       {queue.length > 0 && (
         <ul className="mt-3 space-y-1.5">
           {queue.map((item, i) => (
-            <li key={`${item.name}-${i}`} className="flex items-start gap-2 text-xs">
+            <li
+              key={`${item.name}-${i}`}
+              className="flex items-start gap-2 text-xs"
+            >
               <span className="mt-0.5 shrink-0">
-                {item.status === "done"    && <Check  className="w-3 h-3 text-primary" />}
-                {item.status === "skipped" && <Minus  className="w-3 h-3 text-muted-foreground" />}
-                {item.status === "error"   && <X      className="w-3 h-3 text-destructive" />}
+                {item.status === "done" && (
+                  <Check className="w-3 h-3 text-primary" />
+                )}
+                {item.status === "skipped" && (
+                  <Minus className="w-3 h-3 text-muted-foreground" />
+                )}
+                {item.status === "error" && (
+                  <X className="w-3 h-3 text-destructive" />
+                )}
                 {item.status === "uploading" && (
                   <span className="block w-3 h-3 border border-muted-foreground border-t-transparent rounded-full animate-spin" />
                 )}
@@ -227,21 +253,29 @@ export function FileUpload({ compact = false, uploadedFiles, onFilesChange }: Pr
                 <span
                   className={[
                     "block truncate",
-                    item.status === "error"   ? "text-destructive"    : "",
+                    item.status === "error" ? "text-destructive" : "",
                     item.status === "skipped" ? "text-muted-foreground" : "",
-                    item.status === "pending" ? "text-muted-foreground" : "text-foreground",
+                    item.status === "pending"
+                      ? "text-muted-foreground"
+                      : "text-foreground",
                   ].join(" ")}
                 >
                   {item.name}
                 </span>
                 {item.status === "done" && (
-                  <span className="text-muted-foreground">{item.chunks} chunks</span>
+                  <span className="text-muted-foreground">
+                    {item.chunks} chunks
+                  </span>
                 )}
                 {item.status === "skipped" && (
-                  <span className="text-muted-foreground">Already indexed · {item.chunks} chunks</span>
+                  <span className="text-muted-foreground">
+                    Already indexed · {item.chunks} chunks
+                  </span>
                 )}
                 {item.status === "error" && (
-                  <span className="text-destructive/80 block leading-relaxed">{item.error}</span>
+                  <span className="text-destructive/80 block leading-relaxed">
+                    {item.error}
+                  </span>
                 )}
               </span>
             </li>
@@ -258,5 +292,5 @@ export function FileUpload({ compact = false, uploadedFiles, onFilesChange }: Pr
 
       {fileInput}
     </div>
-  )
+  );
 }

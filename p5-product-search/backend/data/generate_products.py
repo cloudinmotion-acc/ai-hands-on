@@ -1,5 +1,5 @@
 """
-Generates products.xlsx — the P5 retail product catalogue.
+Generates products.xlsx  -  the P5 retail product catalogue.
 65 products across kids, teens, women, men.
 Each row has structured columns (SQL-filterable) + a natural-language description (vector/BM25).
 Run: python generate_products.py
@@ -41,7 +41,7 @@ rows = [
     (5,  "Yellow Floral Sundress",
          "dress", "girls", "yellow", "2-3Y", 1, 4, 320, "cotton", True,
          "Cheerful yellow cotton sundress with a sunflower print throughout. "
-         "Lightweight and breathable — great for summer picnics and casual outings. "
+         "Lightweight and breathable  -  great for summer picnics and casual outings. "
          "Adjustable shoulder straps for a flexible fit as toddlers grow."),
 
     (6,  "Blue Denim Pinafore Dress",
@@ -158,11 +158,11 @@ rows = [
          "ethnic_set", "boys", "blue", "10-11Y", 9, 12, 720, "cotton", True,
          "Royal blue cotton kurta with a mandarin collar and self-print texture, paired with matching pyjama. "
          "A festive yet comfortable choice for Eid, weddings, and family celebrations. "
-         "Easy to move in — boys can enjoy festivities without feeling restricted."),
+         "Easy to move in  -  boys can enjoy festivities without feeling restricted."),
 
     (25, "Red Lehenga Set for Toddlers",
          "lehenga", "girls", "red", "4-5Y", 3, 6, 1100, "silk", True,
-         "Vibrant red silk lehenga choli adorned with golden embroidery — perfect for little ones at weddings and birthday parties. "
+         "Vibrant red silk lehenga choli adorned with golden embroidery  -  perfect for little ones at weddings and birthday parties. "
          "Fully lined for skin comfort; the elasticated waistband makes it easy to wear. "
          "Comes with a matching dupatta for a complete traditional look."),
 
@@ -176,7 +176,7 @@ rows = [
     (27, "Black Skinny Jeans",
          "jeans", "girls", "black", "S", 14, 17, 920, "denim", True,
          "Classic black skinny jeans with a slight stretch for ease of movement. "
-         "A wardrobe staple for teens — works with everything from graphic tees to blouses. "
+         "A wardrobe staple for teens  -  works with everything from graphic tees to blouses. "
          "High-rise waist and ankle-length cut for a sleek, on-trend silhouette."),
 
     (28, "Blue Ripped Skinny Jeans",
@@ -200,7 +200,7 @@ rows = [
     (31, "Oversized Cozy Hoodie",
          "top", "unisex", "grey", "M", 14, 17, 780, "cotton", True,
          "Super-soft grey oversized hoodie with a fleece interior for maximum warmth and comfort. "
-         "The ultimate loungewear piece — great for lazy weekends, cool evenings, and casual school days. "
+         "The ultimate loungewear piece  -  great for lazy weekends, cool evenings, and casual school days. "
          "Roomy kangaroo pocket and a slouchy fit that teens love."),
 
     (32, "Striped Ribbed Tank Top",
@@ -211,7 +211,7 @@ rows = [
 
     (33, "Graphic Oversized Tee",
          "tshirt", "boys", "black", "M", 14, 17, 510, "cotton", True,
-         "Oversized black tee with a bold typographic graphic print — a streetwear staple for teenage boys. "
+         "Oversized black tee with a bold typographic graphic print  -  a streetwear staple for teenage boys. "
          "Heavyweight cotton gives structure while staying soft. "
          "Tuck it into jeans or let it hang loose for a relaxed look."),
 
@@ -238,7 +238,7 @@ rows = [
          "dress", "women", "red", "M", 18, 45, 1350, "georgette", True,
          "Vibrant red georgette wrap dress with ruffle detailing at the hem. "
          "Ideal for date nights, festive parties, and celebratory dinners. "
-         "Lightweight and breathable — comfortable even through a long evening."),
+         "Lightweight and breathable  -  comfortable even through a long evening."),
 
     (38, "Beige Linen Straight Kurta",
          "kurta", "women", "beige", "M", 18, 55, 920, "linen", True,
@@ -249,13 +249,13 @@ rows = [
     (39, "Navy Blue Printed Cotton Kurta",
          "kurta", "women", "navy", "L", 18, 55, 780, "cotton", True,
          "Comfortable navy blue cotton kurta with a geometric block print and three-quarter sleeves. "
-         "Great for office casual, college days, and everyday errands — breathable and easy to care for. "
+         "Great for office casual, college days, and everyday errands  -  breathable and easy to care for. "
          "Available in regular and plus sizes."),
 
     (40, "Multicolour Floral Anarkali Kurta",
          "kurta", "women", "multicolour", "S", 18, 45, 1150, "georgette", True,
          "Flowing anarkali-style kurta in a bold floral print on georgette fabric. "
-         "Festive yet approachable — works for family functions, Diwali celebrations, and semi-formal events. "
+         "Festive yet approachable  -  works for family functions, Diwali celebrations, and semi-formal events. "
          "The flared silhouette is flattering and movement-friendly."),
 
     (41, "White Broderie Anglaise Blouse",
@@ -272,13 +272,13 @@ rows = [
 
     (43, "Teal Embroidered Jacket Kurta Set",
          "ethnic_set", "women", "teal", "M", 18, 50, 2100, "silk", True,
-         "Rich teal silk kurta paired with embroidered jacket and straight pants — a complete festive set. "
+         "Rich teal silk kurta paired with embroidered jacket and straight pants  -  a complete festive set. "
          "Perfect for weddings, cocktail functions, and Diwali celebrations. "
          "Intricate thread embroidery on the jacket adds a luxe, festive touch."),
 
     (44, "Cream Linen Co-ord Set",
          "top", "women", "cream", "S", 18, 45, 1680, "linen", True,
-         "Matching cream linen top and wide-leg trouser set — minimal, chic, and effortless. "
+         "Matching cream linen top and wide-leg trouser set  -  minimal, chic, and effortless. "
          "Ideal for beach holidays, resort wear, and summer brunches. "
          "Natural linen gets softer and more beautiful with every wash."),
 
@@ -292,19 +292,19 @@ rows = [
     (46, "White Oxford Cotton Shirt",
          "shirt", "men", "white", "M", 18, 55, 950, "cotton", True,
          "Crisp white Oxford cotton shirt with a button-down collar and single-button cuffs. "
-         "A boardroom essential and weekend staple — pairs with suits or dark jeans. "
+         "A boardroom essential and weekend staple  -  pairs with suits or dark jeans. "
          "Non-iron finish keeps it looking sharp through long workdays."),
 
     (47, "Blue Slim-Fit Jeans",
          "jeans", "men", "blue", "32", 18, 50, 1350, "denim", True,
          "Classic mid-wash blue denim jeans with a slim but not skinny leg. "
-         "Comfortable for all-day wear — great for casual Fridays, weekend outings, and travel. "
+         "Comfortable for all-day wear  -  great for casual Fridays, weekend outings, and travel. "
          "Slight stretch in the fabric prevents stiffness and allows free movement."),
 
     (48, "Black Straight-Fit Jeans",
          "jeans", "men", "black", "30", 18, 45, 1190, "denim", True,
          "Versatile black straight-cut jeans that dress up or down with ease. "
-         "Works with everything — formal shirts, printed tees, or hoodies. "
+         "Works with everything  -  formal shirts, printed tees, or hoodies. "
          "Durable denim with a comfortable mid-rise waistband."),
 
     (49, "Olive Cargo Shorts",
@@ -316,7 +316,7 @@ rows = [
     (50, "White Pique Polo T-Shirt",
          "tshirt", "men", "white", "L", 18, 50, 620, "cotton", True,
          "Classic white pique polo shirt with ribbed collar and a two-button placket. "
-         "Smartly casual — works for golf, office-casual Fridays, and weekend brunches. "
+         "Smartly casual  -  works for golf, office-casual Fridays, and weekend brunches. "
          "Pre-shrunk cotton holds its shape and stays bright wash after wash."),
 
     (51, "Grey Cotton Kurta",
@@ -333,7 +333,7 @@ rows = [
 
     (53, "Red and Black Checkered Flannel Shirt",
          "shirt", "men", "red", "M", 18, 50, 890, "cotton", True,
-         "Classic red and black buffalo-check flannel shirt — warm, rugged, and effortlessly cool. "
+         "Classic red and black buffalo-check flannel shirt  -  warm, rugged, and effortlessly cool. "
          "Perfect for outdoor weekends, camping trips, and casual winter layering. "
          "Soft-brushed interior gets cosier with every wash."),
 
@@ -352,14 +352,14 @@ rows = [
 
     (56, "Black Bomber Jacket",
          "jacket", "unisex", "black", "M", 14, 25, 1650, "polyester", True,
-         "Sleek black bomber jacket with ribbed cuffs and collar — a streetwear classic. "
+         "Sleek black bomber jacket with ribbed cuffs and collar  -  a streetwear classic. "
          "Lightweight enough for autumn evenings but warm enough for mild winters. "
          "Pairs with everything from joggers to tailored trousers."),
 
     (57, "Beige Belted Trench Coat",
          "jacket", "women", "beige", "M", 18, 45, 2950, "cotton", True,
          "Timeless beige trench coat with a double-breasted front and belted waist. "
-         "An investment piece that elevates any outfit — perfect for office commutes, travel, and formal occasions. "
+         "An investment piece that elevates any outfit  -  perfect for office commutes, travel, and formal occasions. "
          "Water-resistant cotton gabardine handles light showers with ease."),
 
     (58, "Olive Puffer Jacket for Men",
@@ -370,7 +370,7 @@ rows = [
 
     (59, "Red Hooded Windcheater",
          "jacket", "unisex", "red", "6-7Y", 5, 10, 820, "polyester", True,
-         "Bright red windcheater with a hood and reflective strip at the back — great for outdoor safety. "
+         "Bright red windcheater with a hood and reflective strip at the back  -  great for outdoor safety. "
          "Lightweight and packable for school sports days, nature walks, and drizzly mornings. "
          "Wind and water-resistant outer layer keeps kids dry and warm."),
 
@@ -384,13 +384,13 @@ rows = [
     (61, "Blue High-Rise Skinny Jeans",
          "jeans", "women", "blue", "M", 18, 45, 1190, "denim", True,
          "Classic blue high-rise skinny jeans that flatter and elongate the legs. "
-         "Comfortable stretch denim moves with you — great for all-day wear, brunches, and casual office days. "
+         "Comfortable stretch denim moves with you  -  great for all-day wear, brunches, and casual office days. "
          "Ankle-length cut looks polished with heels or sneakers alike."),
 
     (62, "Black Wide-Leg Trousers",
          "pants", "women", "black", "M", 18, 55, 1020, "crepe", True,
          "Elegant black wide-leg trousers in flowing crepe fabric with a high-rise elasticated waist. "
-         "A comfortable yet sophisticated alternative to jeans — perfect for office, dinners, and events. "
+         "A comfortable yet sophisticated alternative to jeans  -  perfect for office, dinners, and events. "
          "Drapes beautifully and pairs with tucked-in blouses or crop tops."),
 
     (63, "Khaki Slim-Fit Joggers",
@@ -402,13 +402,13 @@ rows = [
     (64, "Blue Denim Shorts",
          "shorts", "boys", "blue", "M", 14, 17, 590, "denim", True,
          "Classic blue denim shorts with a five-pocket design and a straight leg. "
-         "A summer essential for teenage boys — pairs with any tee for a laid-back look. "
+         "A summer essential for teenage boys  -  pairs with any tee for a laid-back look. "
          "Durable denim holds up through sports, outings, and outdoor adventures."),
 
     (65, "White Cotton Palazzo Pants",
          "pants", "women", "white", "M", 18, 55, 750, "cotton", True,
          "Breezy white cotton palazzo pants with a wide leg and elasticated waist. "
-         "The ultimate summer comfort piece — cool, light, and effortlessly stylish. "
+         "The ultimate summer comfort piece  -  cool, light, and effortlessly stylish. "
          "Pairs with kurtas, crop tops, or fitted blouses for a versatile wardrobe."),
 ]
 

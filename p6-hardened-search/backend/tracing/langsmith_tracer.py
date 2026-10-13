@@ -16,9 +16,15 @@ import time
 from contextlib import contextmanager
 
 from dotenv import load_dotenv
-from langsmith import Client, traceable  # noqa: F401 — re-exported for convenience
+from langsmith import Client, traceable  # noqa: F401 - re-exported for convenience
 
 load_dotenv()
+
+
+def project_url() -> str:
+    """Return the LangSmith project URL for the configured project."""
+    project = os.environ.get("LANGCHAIN_PROJECT", "p6-hardened-search")
+    return f"https://smith.langchain.com/o/projects?name={project}"
 
 
 def configure() -> None:
@@ -53,4 +59,4 @@ def request_trace(query: str):
         meta["latency_ms"] = round((time.time() - meta.pop("start_time")) * 1000)
         # LangSmith auto-captures LangChain calls inside this block.
         # The meta dict is available for debugging but not automatically
-        # pushed to LangSmith — attach it via @traceable metadata if needed.
+        # pushed to LangSmith - attach it via @traceable metadata if needed.

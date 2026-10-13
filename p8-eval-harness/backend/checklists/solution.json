@@ -1,0 +1,15 @@
+{
+  "stage": "solution",
+  "items": [
+    "Recommends a primary programming language or tech stack with rationale",
+    "Proposes a database or storage solution appropriate to the data model",
+    "Addresses at least two non-functional requirements (performance, reliability, security, scalability)",
+    "Describes an API design approach (REST, GraphQL, gRPC, event-driven, etc.)",
+    "Proposes a deployment or hosting approach (cloud provider, containerization, serverless, etc.)",
+    "Addresses authentication and authorization approach",
+    "Identifies the primary architectural pattern (microservices, monolith, event-driven, etc.)",
+    "Mentions caching, CDN, or performance optimization strategy",
+    "Proposes monitoring, logging, or observability tooling",
+    "Addresses data security, encryption, or privacy requirements"
+  ]
+}

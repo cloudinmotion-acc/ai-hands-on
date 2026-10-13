@@ -15,7 +15,7 @@ client = OpenAI(
 MODEL: str = os.getenv("NVIDIA_MODEL") or ""
 
 def _parse_json(text: str) -> dict:
-    # reasoning models think out loud before the JSON — strip everything before the first {
+    # reasoning models think out loud before the JSON - strip everything before the first {
     match = re.search(r'\{.*\}', text, re.DOTALL)
     if not match:
         raise ValueError(f"No JSON found in LLM response:\n{text}")

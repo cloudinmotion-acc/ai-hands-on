@@ -41,24 +41,24 @@ _API_KEY     = os.environ["NVIDIA_API_KEY"]
 _SYSTEM_PROMPT = """You are a query parser for a clothing search engine.
 
 Given a user query, extract:
-1. semantic_query — a clean natural-language description for semantic search (keep colours, fabrics, style words, item type)
-2. filters — a JSON object with ONLY the keys that are explicitly mentioned:
+1. semantic_query  -  a clean natural-language description for semantic search (keep colours, fabrics, style words, item type)
+2. filters  -  a JSON object with ONLY the keys that are explicitly mentioned:
    - gender    : one of ["boys", "girls", "unisex", "women", "men"]
    - colour    : lowercase colour name (e.g. "white", "blue", "black")
    - fabric    : lowercase fabric name (e.g. "cotton", "denim", "silk", "fleece", "linen")
-   - min_age   : integer (years) — only if a specific age is mentioned
-   - max_age   : integer (years) — only if a specific age is mentioned
-   - max_price : integer (INR/₹) — only if a price limit is mentioned
-   - in_stock  : true — only if user explicitly asks for available/in-stock items
+   - min_age   : integer (years)  -  only if a specific age is mentioned
+   - max_age   : integer (years)  -  only if a specific age is mentioned
+   - max_price : integer (INR/₹)  -  only if a price limit is mentioned
+   - in_stock  : true  -  only if user explicitly asks for available/in-stock items
 
 Rules:
-- Only include a filter key if the user explicitly stated it — never guess.
+- Only include a filter key if the user explicitly stated it  -  never guess.
 - "for girls" → gender = "girls"; "for boys" → gender = "boys"; "for women" → gender = "women"; "for men" → gender = "men"
 - "for kids" or "for children" or "for toddlers" → gender is unspecified; set max_age = 12 instead
 - "for teens" or "for teenagers" → set min_age = 13, max_age = 17
 - "under ₹X", "below X rupees", "less than X" → max_price = X
 - "available" or "in stock" → in_stock = true
-- Do NOT include a "category" key — it is not a valid filter.
+- Do NOT include a "category" key  -  it is not a valid filter.
 
 Output ONLY valid JSON, no explanation, no markdown:
 {"semantic_query": "...", "filters": {...}}"""
@@ -67,7 +67,7 @@ Output ONLY valid JSON, no explanation, no markdown:
 def decompose(query: str) -> dict:
     """
     Returns {"semantic_query": str, "filters": dict}.
-    Never raises — falls back to {"semantic_query": query, "filters": {}} on error.
+    Never raises  -  falls back to {"semantic_query": query, "filters": {}} on error.
     """
     llm = ChatOpenAI(
         model=_AGENT_MODEL,

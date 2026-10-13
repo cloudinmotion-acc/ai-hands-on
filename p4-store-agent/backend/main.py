@@ -1,10 +1,10 @@
 """
-P4 Store Agent — FastAPI backend
+P4 Store Agent - FastAPI backend
 
 Endpoints:
-  POST /chat        — streams agent trace as SSE events
-  GET  /scenarios   — returns the 5 built-in demo scenarios
-  GET  /health      — liveness check
+  POST /chat        - streams agent trace as SSE events
+  GET  /scenarios   - returns the 5 built-in demo scenarios
+  GET  /health      - liveness check
 """
 
 import asyncio
@@ -86,13 +86,13 @@ async def _stream_agent(user_request: str, model: str | None = None) -> AsyncIte
     Runs the LangGraph agent and yields SSE frames for each step.
 
     Event types:
-      start       — run begins
-      thought     — LLM reasoning tokens (streaming)
-      tool_call   — which tool + args the agent chose
-      observation — result returned by the tool
-      answer      — full final answer text (last LLM turn, no tool calls)
-      done        — run complete
-      error       — unrecoverable failure
+      start       - run begins
+      thought     - LLM reasoning tokens (streaming)
+      tool_call   - which tool + args the agent chose
+      observation - result returned by the tool
+      answer      - full final answer text (last LLM turn, no tool calls)
+      done        - run complete
+      error       - unrecoverable failure
     """
     yield _sse("start", {"message": "Agent started"})
 

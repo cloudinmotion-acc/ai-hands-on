@@ -43,7 +43,7 @@ def check(text: str) -> GuardResult:
             return GuardResult(
                 passed=False,
                 action="block",
-                reason=f"injection: override phrase detected — '{phrase}'",
+                reason=f"injection: override phrase detected - '{phrase}'",
             )
 
     for phrase in _LEAK_PHRASES:
@@ -51,7 +51,7 @@ def check(text: str) -> GuardResult:
             return GuardResult(
                 passed=False,
                 action="block",
-                reason=f"injection: system-leak attempt — '{phrase}'",
+                reason=f"injection: system-leak attempt - '{phrase}'",
             )
 
     if _DELIMITER_RE.search(text):

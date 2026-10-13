@@ -1,5 +1,5 @@
 """
-P6 guard eval — runs all adversarial queries through the input guard
+P6 guard eval - runs all adversarial queries through the input guard
 and checks the result against expected_action.
 
 Run from p6-hardened-search/backend/:
@@ -34,7 +34,7 @@ def run_eval():
     results = []
     passed = 0
 
-    print(f"\n{BOLD}P6 Input Guard Eval — {len(queries)} queries{RESET}\n")
+    print(f"\n{BOLD}P6 Input Guard Eval - {len(queries)} queries{RESET}\n")
     print(f"{'ID':<4} {'Category':<12} {'Expected':<10} {'Got':<10} {'Status':<8} Reason")
     print("─" * 80)
 

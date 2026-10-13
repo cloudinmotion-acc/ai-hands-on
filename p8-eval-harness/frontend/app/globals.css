@@ -1,0 +1,154 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ─── Light mode (P7-matching warm cream palette) ──────────────────────── */
+@theme {
+  --color-background:         oklch(0.977 0.008 82);
+  --color-surface:            oklch(0.991 0.005 78);
+  --color-surface-raised:     oklch(0.960 0.010 80);
+  --color-foreground:         oklch(0.155 0.015 65);
+  --color-muted:              oklch(0.948 0.012 80);
+  --color-muted-foreground:   oklch(0.44  0.020 70);
+  --color-border:             oklch(0.882 0.015 76);
+  --color-border-subtle:      oklch(0.920 0.010 78);
+
+  /* Primary — warm amber-olive (P7 exact) */
+  --color-primary:            oklch(0.42  0.120 72);
+  --color-primary-dim:        oklch(0.42  0.120 72 / 0.10);
+  --color-primary-foreground: oklch(0.985 0     0);
+
+  /* Semantic — calibrated for legibility on cream */
+  --color-go:                 oklch(0.480 0.165 150);
+  --color-go-dim:             oklch(0.690 0.175 150 / 0.09);
+  --color-nogo:               oklch(0.530 0.235 27);
+  --color-nogo-dim:           oklch(0.577 0.245 27 / 0.09);
+  --color-warn:               oklch(0.55  0.160 72);
+  --color-warn-dim:           oklch(0.770 0.170 72 / 0.09);
+  --color-destructive:        oklch(0.577 0.245 27.325);
+
+  /* Stage label colors — must be legible on light background */
+  --color-stage-scoping:  oklch(0.40 0.145 255);
+  --color-stage-solution: oklch(0.44 0.140 170);
+  --color-stage-hld:      oklch(0.40 0.140 298);
+  --color-stage-lld:      oklch(0.48 0.148 335);
+
+  /* Shimmer gradient tokens */
+  --color-shimmer-1: oklch(0.960 0.008 80);
+  --color-shimmer-2: oklch(0.935 0.012 80);
+
+  --font-sans:    "Manrope",       system-ui, sans-serif;
+  --font-heading: "Spectral",      Georgia,   serif;
+  --font-mono:    "JetBrains Mono","Fira Code", monospace;
+}
+
+/* ─── Dark mode — warm-inverted navy (activated by html.dark) ──────────── */
+html.dark {
+  --color-background:         oklch(0.148 0.018 265);
+  --color-surface:            oklch(0.188 0.020 265);
+  --color-surface-raised:     oklch(0.220 0.020 265);
+  --color-foreground:         oklch(0.935 0.008 265);
+  --color-muted:              oklch(0.200 0.018 265);
+  --color-muted-foreground:   oklch(0.560 0.016 265);
+  --color-border:             oklch(0.270 0.018 265);
+  --color-border-subtle:      oklch(0.220 0.016 265);
+  --color-primary:            oklch(0.68  0.130 72);
+  --color-primary-dim:        oklch(0.68  0.130 72 / 0.15);
+  --color-go:                 oklch(0.690 0.175 150);
+  --color-go-dim:             oklch(0.690 0.175 150 / 0.12);
+  --color-nogo:               oklch(0.628 0.220 26);
+  --color-nogo-dim:           oklch(0.628 0.220 26 / 0.12);
+  --color-warn:               oklch(0.770 0.170 72);
+  --color-warn-dim:           oklch(0.770 0.170 72 / 0.12);
+  --color-stage-scoping:      oklch(0.680 0.145 240);
+  --color-stage-solution:     oklch(0.720 0.135 220);
+  --color-stage-hld:          oklch(0.700 0.140 295);
+  --color-stage-lld:          oklch(0.700 0.140 340);
+  --color-shimmer-1:          oklch(0.148 0.010 265);
+  --color-shimmer-2:          oklch(0.175 0.012 265);
+}
+
+/* ─── Base reset ────────────────────────────────────────────────────────── */
+@layer base {
+  * { @apply border-border box-border; }
+  body { @apply bg-background text-foreground font-sans antialiased; }
+
+  ::-webkit-scrollbar        { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  { background: var(--color-border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-muted-foreground); }
+
+  ::selection { background: var(--color-primary-dim); color: var(--color-foreground); }
+}
+
+/* ─── Keyframes ─────────────────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes pulse-go {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.690 0.175 150 / 0.4); }
+  50%       { box-shadow: 0 0 0 8px oklch(0.690 0.175 150 / 0); }
+}
+@keyframes pulse-nogo {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.628 0.220 26 / 0.4); }
+  50%       { box-shadow: 0 0 0 8px oklch(0.628 0.220 26 / 0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* ─── Utilities ─────────────────────────────────────────────────────────── */
+@layer utilities {
+  .slide-in  { animation: slideIn 0.22s ease-out; }
+  .font-mono { font-family: var(--font-mono); }
+
+  .verdict-go   { animation: pulse-go   2.4s ease-in-out infinite; }
+  .verdict-nogo { animation: pulse-nogo 2.4s ease-in-out infinite; }
+
+  .score-bar {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--color-border);
+    overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .shimmer-row {
+    background: linear-gradient(
+      90deg,
+      var(--color-shimmer-1) 25%,
+      var(--color-shimmer-2) 50%,
+      var(--color-shimmer-1) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite;
+  }
+
+  .btn-spinner {
+    display: inline-block; width: 13px; height: 13px;
+    border: 2px solid var(--color-primary-dim);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 99px; font-size: 10px;
+    font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    font-family: var(--font-mono);
+  }
+  .chip-pass { background: var(--color-go-dim);   color: var(--color-go);   border: 1px solid oklch(from var(--color-go) l c h / 0.30); }
+  .chip-fail { background: var(--color-nogo-dim); color: var(--color-nogo); border: 1px solid oklch(from var(--color-nogo) l c h / 0.30); }
+  .chip-warn { background: var(--color-warn-dim); color: var(--color-warn); border: 1px solid oklch(from var(--color-warn) l c h / 0.30); }
+  .chip-skip { background: var(--color-muted);    color: var(--color-muted-foreground); border: 1px solid var(--color-border); }
+}

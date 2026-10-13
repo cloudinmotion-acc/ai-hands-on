@@ -1,12 +1,12 @@
 """
-P5 agent — LangGraph ReAct agent that uses the MCP search_products tool.
+P5 agent  -  LangGraph ReAct agent that uses the MCP search_products tool.
 
 The agent receives a user shopping query, calls search_products() via the
 in-process MCP bridge, then synthesises a friendly natural-language response
 with a product recommendation list.
 
 Note: we call the search pipeline directly (function import) rather than
-spawning a separate MCP subprocess — this keeps the demo simple and avoids
+spawning a separate MCP subprocess  -  this keeps the demo simple and avoids
 an extra process. The MCP server is still available as a standalone process
 for any external MCP client.
 """

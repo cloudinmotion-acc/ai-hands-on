@@ -1,5 +1,5 @@
 """
-P5 FastAPI server — SSE streaming endpoint for the LangGraph shopping agent.
+P5 FastAPI server  -  SSE streaming endpoint for the LangGraph shopping agent.
 
 Endpoints:
     POST /search        → JSON body: { "query": str }

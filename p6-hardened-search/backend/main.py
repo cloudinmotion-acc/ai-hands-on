@@ -1,5 +1,5 @@
 """
-P6 FastAPI server — hardened wrapper around P5.
+P6 FastAPI server - hardened wrapper around P5.
 
 Flow per request:
   1. Input guards  (injection → PII → topic)
@@ -8,10 +8,10 @@ Flow per request:
   4. Stream result to frontend
 
 SSE events emitted:
-  guard_info    — when a guard rewrites input or output (logged, not blocking)
-  guard_blocked — when injection or topic guard fires
-  start / tool_call / tool_result — forwarded directly from P5
-  final_answer  — may be the rewritten version from output guard
+  guard_info    - when a guard rewrites input or output (logged, not blocking)
+  guard_blocked - when injection or topic guard fires
+  start / tool_call / tool_result - forwarded directly from P5
+  final_answer  - may be the rewritten version from output guard
   done
 """
 
@@ -66,7 +66,7 @@ async def _stream(query: str):
                 "guard": input_result.guard_name,
                 "reason": input_result.reason,
             })
-            yield _sse({"type": "done"})
+            yield _sse({"type": "done", "langsmith_url": langsmith_tracer.project_url()})
             return
 
         if input_result.action == "rewrite":
@@ -107,11 +107,11 @@ async def _stream(query: str):
 
                         elif event_type == "final_answer":
                             final_answer = event.get("content", "")
-                            # Don't yield yet — output guard runs first
+                            # Don't yield yet - output guard runs first
 
                         elif event_type == "error":
                             yield _sse(event)
-                            yield _sse({"type": "done"})
+                            yield _sse({"type": "done", "langsmith_url": langsmith_tracer.project_url()})
                             return
 
                         # "done" from P5 is swallowed here;
@@ -122,7 +122,7 @@ async def _stream(query: str):
                 "type": "error",
                 "message": f"Cannot reach P5 at {P5_BASE_URL}. Is it running?",
             })
-            yield _sse({"type": "done"})
+            yield _sse({"type": "done", "langsmith_url": langsmith_tracer.project_url()})
             return
 
         # ── Step 3: Output guard ──────────────────────────────────────
@@ -142,7 +142,7 @@ async def _stream(query: str):
 
             yield _sse({"type": "final_answer", "content": final_answer})
 
-        yield _sse({"type": "done"})
+        yield _sse({"type": "done", "langsmith_url": langsmith_tracer.project_url()})
 
 
 @app.post("/search")
